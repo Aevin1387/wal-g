@@ -44,8 +44,12 @@ func (b *Bundle) StartBackup(conn *pgx.Conn, backup string) (string, uint64, err
 	if version >= 100000 {
 		walname = "wal"
 	}
+	pgbackup := "pg_start_backup($1, true, false)"
+	if version < 90600 {
+		pgbackup = "pg_start_backup($1, true)"
+	}
 
-	query := "SELECT case when pg_is_in_recovery() then '' else (pg_" + walname + "file_name_offset(lsn)).file_name end, lsn::text, pg_is_in_recovery() FROM pg_start_backup($1, true, false) lsn"
+	query := "SELECT case when pg_is_in_recovery() then '' else (pg_" + walname + "file_name_offset(lsn)).file_name end, lsn::text, pg_is_in_recovery() FROM " + pgbackup + " lsn"
 	err = conn.QueryRow(query, backup).Scan(&name, &lsnStr, &b.Replica)
 
 	lsn, err := ParseLsn(lsnStr)
