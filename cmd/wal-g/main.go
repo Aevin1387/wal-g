@@ -97,9 +97,93 @@ func main() {
 
 	if command == "wal-fetch" {
 		// Fetch and decompress a WAL file from S3.
+<<<<<<< HEAD
 		walg.HandleWALFetch(pre, firstArgument, backupName, true)
 	} else if command == "wal-prefetch" {
 		walg.HandleWALPrefetch(pre, firstArgument, backupName)
+=======
+		archive := *pre.Server + "/wal_005/" + dirArc + ".lzo"
+		a := &walg.Archive{
+			Prefix:  pre,
+			Archive: aws.String(archive),
+		}
+
+		// Check existence of compressed LZO WAL file
+		exists, err := a.CheckExistence()
+		if err != nil {
+			log.Fatalf("%+v\n", err)
+		}
+
+		crypter := walg.OpenPGPCrypter{}
+
+		if exists {
+			log.Printf("Retrieving %s", archive)
+
+			arch, err := a.GetArchive()
+			if err != nil {
+				log.Fatalf("%+v\n", err)
+			}
+
+			if crypter.IsUsed() {
+				var reader io.Reader
+				reader, err = crypter.Decrypt(arch)
+				if err != nil {
+					log.Fatalf("%v\n", err)
+				}
+				arch = walg.ReadCascadeClose{reader, arch}
+			}
+
+			f, err := os.Create(backupName)
+			if err != nil {
+				log.Fatalf("%v\n", err)
+			}
+
+			err = walg.DecompressLzo(f, arch)
+			if err != nil {
+				log.Fatalf("%+v\n", err)
+			}
+			f.Close()
+		} else if !exists {
+			// Check existence of compressed LZ4 WAL file
+			archive := *pre.Server + "/wal_005/" + dirArc + ".lz4"
+			a.Archive = aws.String(archive)
+
+			exists, err = a.CheckExistence()
+			if err != nil {
+				log.Fatalf("%+v\n", err)
+			}
+
+			if exists {
+				log.Printf("Retrieving %s", archive)
+				arch, err := a.GetArchive()
+				if err != nil {
+					log.Fatalf("%+v\n", err)
+				}
+
+				if crypter.IsUsed() {
+					var reader io.Reader
+					reader, err = crypter.Decrypt(arch)
+					if err != nil {
+						log.Fatalf("%v\n", err)
+					}
+					arch = walg.ReadCascadeClose{reader, arch}
+				}
+
+				f, err := os.Create(backupName)
+				if err != nil {
+					log.Fatalf("%v\n", err)
+				}
+
+				err = walg.DecompressLz4(f, arch)
+				if err != nil {
+					log.Fatalf("%+v\n", err)
+				}
+				f.Close()
+			} else {
+				log.Fatalf("Archive '%s' does not exist.\n", dirArc)
+			}
+		}
+>>>>>>> Add logging of file retrieval on wal-fetch.
 	} else if command == "wal-push" {
 		// Upload a WAL file to S3.
 		walg.HandleWALPush(tu, firstArgument)
