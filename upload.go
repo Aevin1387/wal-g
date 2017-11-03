@@ -333,9 +333,23 @@ func (bundle *Bundle) HandleSentinel() error {
 func (bundle *Bundle) HandleLabelFiles(conn *pgx.Conn) error {
 	var lb string
 	var sc string
-	err := conn.QueryRow("SELECT labelfile, spcmapfile FROM pg_stop_backup(false)").Scan(&lb, &sc)
+	var version int
+	err := conn.QueryRow("select (current_setting('server_version_num'))::int").Scan(&version)
+	if err != nil {
+		return errors.Wrap(err, "QueryFile: getting Postgres version failed")
+	}
+	stopBackupQuery := "SELECT labelfile, spcmapfile FROM pg_stop_backup(false)";
+	if version < 90600 {
+		stopBackupQuery = "SELECT file_name, lpad(file_offset::text, 8, '0') AS file_offset FROM pg_xlogfile_name_offset(pg_stop_backup())"
+	}
+
+	err = conn.QueryRow(stopBackupQuery).Scan(&lb, &sc)
 	if err != nil {
 		return errors.Wrap(err, "HandleLabelFiles: stop backup failed")
+	}
+
+	if version < 90600 {
+		return nil
 	}
 
 	bundle.NewTarBall()
