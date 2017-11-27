@@ -344,9 +344,9 @@ func (bundle *Bundle) HandleLabelFiles(conn *pgx.Conn) error {
 	if err != nil {
 		return errors.Wrap(err, "QueryFile: getting Postgres version failed")
 	}
-	stopBackupQuery := "SELECT labelfile, spcmapfile FROM pg_stop_backup(false)";
+	stopBackupQuery := "set statement_timeout=0; SELECT labelfile, spcmapfile FROM pg_stop_backup(false)";
 	if version < 90600 {
-		stopBackupQuery = "SELECT file_name, lpad(file_offset::text, 8, '0') AS file_offset FROM pg_xlogfile_name_offset(pg_stop_backup())"
+		stopBackupQuery = "set statement_timeout=0; SELECT file_name, lpad(file_offset::text, 8, '0') AS file_offset FROM pg_xlogfile_name_offset(pg_stop_backup())"
 	}
 
 	err = conn.QueryRow(stopBackupQuery).Scan(&lb, &sc)
