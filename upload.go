@@ -340,7 +340,16 @@ func (bundle *Bundle) HandleLabelFiles(conn *pgx.Conn) error {
 	var lb string
 	var sc string
 	var version int
-	err := conn.QueryRow("select (current_setting('server_version_num'))::int").Scan(&version)
+
+	tx, err := conn.Begin()
+	if err != nil {
+		return errors.Wrap(err, "HandleLabelFiles: transaction begin failed")
+	}
+	defer tx.Rollback()
+
+	_, err = tx.Exec("SET statement_timeout=0;")
+
+	err = tx.QueryRow("select (current_setting('server_version_num'))::int").Scan(&version)
 	if err != nil {
 		return errors.Wrap(err, "QueryFile: getting Postgres version failed")
 	}
@@ -349,13 +358,18 @@ func (bundle *Bundle) HandleLabelFiles(conn *pgx.Conn) error {
 		stopBackupQuery = "SELECT file_name, lpad(file_offset::text, 8, '0') AS file_offset FROM pg_xlogfile_name_offset(pg_stop_backup())"
 	}
 
-	err = conn.QueryRow(stopBackupQuery).Scan(&lb, &sc)
+	err = tx.QueryRow(stopBackupQuery).Scan(&lb, &sc)
 	if err != nil {
 		return errors.Wrap(err, "HandleLabelFiles: stop backup failed")
 	}
 
 	if version < 90600 {
 		return nil
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		return errors.Wrap(err, "HandleLabelFiles: commit failed")
 	}
 
 	bundle.NewTarBall()
