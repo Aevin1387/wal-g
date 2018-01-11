@@ -18,7 +18,8 @@ var helpMsg = "  backup-fetch\tfetch a backup from S3\n" +
 	"  backup-list\tprints available backups\n" +
 	"  wal-fetch\tfetch a WAL file from S3\n" +
 	"  wal-push\tupload a WAL file to S3\n" +
-	"  delete\tclear old backups and WALs\n"
+	"  delete\tclear old backups and WALs\n" +
+	"  extract\textract a local WAL file\n"
 
 func init() {
 	flag.Usage = func() {
@@ -65,6 +66,8 @@ func main() {
 		case "wal-push":
 			fmt.Printf("usage:\twal-g wal-push archive_path\n\n")
 			os.Exit(0)
+		case "extract":
+			fmt.Printf("usage:\twal-g extract file_to_extract extract_to\n\n")
 		default:
 			l.Fatalf("Command '%s' is unsupported by WAL-G.\n\n", command)
 		}
@@ -111,6 +114,8 @@ func main() {
 		walg.HandleBackupList(pre)
 	} else if command == "delete" {
 		walg.HandleDelete(pre, all)
+	} else if command == "extract" {
+		walg.HandleExtract(firstArgument, backupName)
 	} else {
 		l.Fatalf("Command '%s' is unsupported by WAL-G.", command)
 	}
