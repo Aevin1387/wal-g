@@ -210,7 +210,7 @@ func (tu *TarUploader) upload(input *s3manager.UploadInput, path string) (err er
 // createUploadInput creates a s3manager.UploadInput for a TarUploader using
 // the specified path and reader.
 func (tu *TarUploader) createUploadInput(path string, reader io.Reader) *s3manager.UploadInput {
-	return &s3manager.UploadInput{
+	uploadInput := &s3manager.UploadInput{
 		Bucket:               aws.String(tu.bucket),
 		Key:                  aws.String(path),
 		Body:                 reader,
@@ -218,6 +218,15 @@ func (tu *TarUploader) createUploadInput(path string, reader io.Reader) *s3manag
 		ServerSideEncryption: aws.String(tu.ServerSideEncryption),
 		SSEKMSKeyId:          aws.String(tu.SSEKMSKeyId),
 	}
+
+	if tu.ServerSideEncryption != "" {
+		uploadInput.ServerSideEncryption = aws.String(tu.ServerSideEncryption)
+
+		if tu.ServerSideEncryption == "aws:kms" && tu.SSEKMSKeyId != "" {
+			uploadInput.SSEKMSKeyId = aws.String(tu.SSEKMSKeyId)
+		}
+	}
+	return uploadInput
 }
 
 // StartUpload creates a lz4 writer and runs upload in the background once
