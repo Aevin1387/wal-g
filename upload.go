@@ -353,6 +353,10 @@ func (bundle *Bundle) HandleLabelFiles(conn *pgx.Conn) (uint64, error) {
 		return 0, errors.Wrap(err, "HandleLabelFiles: failed to stop backup")
 	}
 
+	if queryRunner.Version < 90600 {
+		return 0, nil
+	}
+
 	lsn, err := ParseLsn(lsnStr)
 	if err != nil {
 		return 0, errors.Wrap(err, "HandleLabelFiles: failed to parse finish LSN")
