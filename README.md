@@ -85,6 +85,10 @@ To configure the S3 storage class used for backup files, use `WALG_S3_STORAGE_CL
 
 To enable S3 server-side encryption, set to the algorithm to use when storing the objects in S3 (i.e., `AES256`, `aws:kms`).
 
+* `WALG_S3_SSE_KMS_ID`
+
+If using S3 server-side encryption with `aws:kms`, the KMS Key ID to use for object encryption.
+
 * `WALE_GPG_KEY_ID`
 
 To configure GPG key for encryption and decryption. By default, no encryption is used. Public keyring is cached in the file "/.walg_key_cache".

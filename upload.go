@@ -149,6 +149,11 @@ func Configure() (*TarUploader, *Prefix, error) {
 		upload.ServerSideEncryption = serverSideEncryption
 	}
 
+	sseKmsKeyId, ok := os.LookupEnv("WALG_S3_SSE_KMS_ID")
+	if ok {
+		upload.SSEKMSKeyId = sseKmsKeyId
+	}
+
 	upload.Upl = CreateUploader(pre.Svc, 20*1024*1024, con) //default 10 concurrency streams at 20MB
 
 	return upload, pre, err
@@ -206,11 +211,12 @@ func (tu *TarUploader) upload(input *s3manager.UploadInput, path string) (err er
 // the specified path and reader.
 func (tu *TarUploader) createUploadInput(path string, reader io.Reader) *s3manager.UploadInput {
 	return &s3manager.UploadInput{
-		Bucket:       aws.String(tu.bucket),
-		Key:          aws.String(path),
-		Body:         reader,
-		StorageClass: aws.String(tu.StorageClass),
+		Bucket:               aws.String(tu.bucket),
+		Key:                  aws.String(path),
+		Body:                 reader,
+		StorageClass:         aws.String(tu.StorageClass),
 		ServerSideEncryption: aws.String(tu.ServerSideEncryption),
+		SSEKMSKeyId:          aws.String(tu.SSEKMSKeyId),
 	}
 }
 

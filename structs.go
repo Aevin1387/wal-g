@@ -236,9 +236,12 @@ func (s *S3TarBall) Finish(sentinel *S3TarBallSentinelDto) error {
 		}
 		path := tupl.server + "/basebackups_005/" + name
 		input := &s3manager.UploadInput{
-			Bucket: aws.String(tupl.bucket),
-			Key:    aws.String(path),
-			Body:   bytes.NewReader(dtoBody),
+			Bucket:               aws.String(tupl.bucket),
+			Key:                  aws.String(path),
+			Body:                 bytes.NewReader(dtoBody),
+			StorageClass:         aws.String(tupl.StorageClass),
+			ServerSideEncryption: aws.String(tupl.ServerSideEncryption),
+			SSEKMSKeyId:          aws.String(tupl.SSEKMSKeyId),
 		}
 
 		tupl.wg.Add(1)
@@ -281,6 +284,7 @@ type TarUploader struct {
 	MaxRetries           int
 	MaxWait              float64
 	ServerSideEncryption string
+	SSEKMSKeyId          string
 	StorageClass         string
 	Success              bool
 	bucket               string
@@ -318,6 +322,8 @@ func (tu *TarUploader) Clone() *TarUploader {
 		tu.Upl,
 		tu.MaxRetries,
 		tu.MaxWait,
+		tu.ServerSideEncryption,
+		tu.SSEKMSKeyId,
 		tu.StorageClass,
 		tu.Success,
 		tu.bucket,
