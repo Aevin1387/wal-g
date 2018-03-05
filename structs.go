@@ -241,6 +241,7 @@ func (s *S3TarBall) Finish(sentinel *S3TarBallSentinelDto) error {
 			Body:                 bytes.NewReader(dtoBody),
 			StorageClass:         aws.String(tupl.StorageClass),
 			ServerSideEncryption: aws.String(tupl.ServerSideEncryption),
+			SSEKMSKeyId:          aws.String(tupl.SSEKMSKeyId),
 		}
 
 		tupl.wg.Add(1)
@@ -283,6 +284,7 @@ type TarUploader struct {
 	MaxRetries           int
 	MaxWait              float64
 	ServerSideEncryption string
+	SSEKMSKeyId          string
 	StorageClass         string
 	Success              bool
 	bucket               string
@@ -321,6 +323,7 @@ func (tu *TarUploader) Clone() *TarUploader {
 		tu.MaxRetries,
 		tu.MaxWait,
 		tu.ServerSideEncryption,
+		tu.SSEKMSKeyId,
 		tu.StorageClass,
 		tu.Success,
 		tu.bucket,
