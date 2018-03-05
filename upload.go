@@ -211,12 +211,10 @@ func (tu *TarUploader) upload(input *s3manager.UploadInput, path string) (err er
 // the specified path and reader.
 func (tu *TarUploader) createUploadInput(path string, reader io.Reader) *s3manager.UploadInput {
 	uploadInput := &s3manager.UploadInput{
-		Bucket:               aws.String(tu.bucket),
-		Key:                  aws.String(path),
-		Body:                 reader,
-		StorageClass:         aws.String(tu.StorageClass),
-		ServerSideEncryption: aws.String(tu.ServerSideEncryption),
-		SSEKMSKeyId:          aws.String(tu.SSEKMSKeyId),
+		Bucket:       aws.String(tu.bucket),
+		Key:          aws.String(path),
+		Body:         reader,
+		StorageClass: aws.String(tu.StorageClass),
 	}
 
 	if tu.ServerSideEncryption != "" {
