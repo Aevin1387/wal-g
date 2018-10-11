@@ -116,10 +116,12 @@ func ExtractAll(tarInterpreter TarInterpreter, files []ReaderMaker) error {
 
 	// here we try to restart idempotent tar reader 3 times
 	currentRun := files
+	log.Info("Running first extraction")
 	failed := tryExtractFiles(currentRun, tarInterpreter, collectAll, false, con)
 
 	// Lowering parallelism for failed tars
 	for len(failed) > 0 && con > 1 {
+		log.Infof("Running second extract for %d failed files", len(failed))
 		currentRun = failed
 		con /= 2
 		failed = tryExtractFiles(failed, tarInterpreter, collectAll, false, con)
@@ -127,11 +129,13 @@ func ExtractAll(tarInterpreter TarInterpreter, files []ReaderMaker) error {
 
 	// If we have failed tars we iterate until we see a progress
 	for len(failed) > 0 && len(failed) < len(currentRun) {
+		log.Infof("Running third extract for %d failed files", len(failed))
 		currentRun = failed
 		failed = tryExtractFiles(failed, tarInterpreter, collectAll, false, 1)
 	}
 	// Last attempt to obtain err
 	if len(failed) > 0 {
+		log.Infof("Running final extract for %d failed files", len(failed))
 		tryExtractFiles(failed, tarInterpreter, collectAll, true, 1)
 	}
 	return err
