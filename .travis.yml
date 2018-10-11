@@ -1,27 +1,26 @@
 notifications:
   email: false
 services:
-  - docker
-script: ./build.sh
+- docker
+script: "./build.sh"
 language: go
 dist: trusty
 go:
-  - 1.10.x
+- 1.10.x
 matrix:
   include:
-    - env: GOTAGS= BINSUFFIX=
-    - env: GOTAGS=lzo BINSUFFIX=.lzo
-      addons:
-        apt:
-          packages: liblzo2-dev
+  - env: GOTAGS= BINSUFFIX=
+  - env: GOTAGS=lzo BINSUFFIX=.lzo
+    addons:
+      apt:
+        packages: liblzo2-dev
 before_deploy:
-  - tar -zcf wal-g.linux-amd64$BINSUFFIX.tar.gz -C cmd/wal-g/ wal-g
+- tar -zcf wal-g.linux-amd64$BINSUFFIX.tar.gz -C cmd/wal-g/ wal-g
 deploy:
   provider: releases
   api_key:
-    secure: nRVV5uKaBdCi/J/sLP7+c/shuDEaSeMiapEsro5gp4gr8n/QMgGm5AHNZhkfQVBmhmaKNB7dDzg34RVD2qacVpeZQTTUWetorBiwWvSjf+mlVcmBPKOIivamqetIdMEPgGQ0vudDADMpYiiqWBV893vAg1w0x02Cz7yvduzKEDyVttH+P4A7MPZ9tPtwLyMoOKjxe7Z0IOp82DK0rj+2KXQYe+El9Ipya+2WB88NBuRn2dJSfsAx9VI+5VmUz0waB1lP3ityjgQpaL13QEV6qsCXl+ntb4vGACbPYoPt0pgesq/zkL2ScFKTbzSSo6yByf3zHhV+elZ2sXnK/UYrqe4erC3qkG5qiTuy+uzPKg0pOVdqI1kDtMNoIanCjSVblXXsR+vz0UVHbzOmTMm7ckpnMB1nxsSyaQfs1C2e42SCgIB57RJsWUSsRx/Uq9iJS32ab/8pSnzJ2dZLNo4BxNHJDgKpmfj6ZKhBne+JUcfBsx2DOXs1ad9s0+ahpnlLiijhQQ5ZxGTfzYcXjijtAOyN2Y42wU6YI3L7ezsZTw+AoJeBMdc2MM8yy1CI/PM0x5IL+e9cZ+LoL87f0WZFxMd0KYblEeQzL+yRv0M5cRf4GPgqgEFsYUU4WXAH6Fnah2dailOvkfV1ygbaTxjvrSiIDnk0DKls3y8QLwSJPLw=
-  skip_cleanup: true
+    secure: AgVPz2VNVzgXR2X03oHDCokXSeVxzLkGUiBu4CV/WOV130AuCbKcHXx3RUeuwkTCYS/wpHS+w3w1R/e1cRC/joIDQPYXGTm7gMKXTIQJRIjqG4CbWG52xnz1MuXI71qws6rMxJ/Px0CM4bnH/uOTQ9ueugWkHjZ9ltmJBf3exJtLCHV1teLrVXgvTjw63EpZKO6L7RbgFm1P4I/zuUVKDggz9e/mNbTJuQNEyU1TaveG9x4j39zww2/SelvUAkA49pAHj5yNpz8TmoPhkNvacWDu09vzgQWh8taQFCfy0poEms3L2f4hiQ5TiDU9R3Tli3Dcyu6s+VTB4hYwXaIIHp9Wh7/jLy8sCe3DD/C1xgvu0zsWl7OYU6ffmqUvpP3Uk9SBO1mZYNCZI3rkFx3p+7MM2n16ca0q+4Xiej+6ocMGktXf/m/+Gr1AV24JuR+9+T6pA4nVOUBcfvwOmsaupAGIeSg7lraqKwnfx1wWd69xghLAhqHqTNM4nbZvoyk0ayErkR5Rq7CwigbeLYaJujgIQWgjMmh90Yzv3E0Q9Xy8fSX0vGGDkwcJEpPqogaqeToLni7wu0Lto88oTeT1Wjtqutak99jX14SNqFvKoxKu5MQOgDg+xkO7ArR81/YhnphZhEIsutQ9cyocXYh84FWdvWl9Yfd8pE6SV8r1xMw=
   file: wal-g.linux-amd64$BINSUFFIX.tar.gz
   on:
-    repo: wal-g/wal-g
+    repo: Aevin1387/wal-g
     tags: true
