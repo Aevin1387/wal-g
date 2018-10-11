@@ -3,13 +3,14 @@ package walg
 import (
 	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 	"os/exec"
 	"path"
 	"strings"
 	"sync"
 	"time"
+
+	log "github.com/sirupsen/logrus"
 )
 
 // HandleWALPrefetch is invoked by wal-fetch command to speed up database restoration

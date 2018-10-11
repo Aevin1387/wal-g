@@ -4,13 +4,14 @@ import (
 	"crypto/tls"
 	"flag"
 	"fmt"
-	"github.com/wal-g/wal-g"
-	"github.com/wal-g/wal-g/test_tools"
-	"log"
 	"net/http"
 	"os"
 	"runtime/pprof"
 	"strings"
+
+	log "github.com/sirupsen/logrus"
+	"github.com/wal-g/wal-g"
+	"github.com/wal-g/wal-g/test_tools"
 )
 
 var profile bool

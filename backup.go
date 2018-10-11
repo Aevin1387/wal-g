@@ -2,14 +2,15 @@ package walg
 
 import (
 	"encoding/json"
+	"io/ioutil"
+	"sort"
+	"strings"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/pkg/errors"
-	"io/ioutil"
-	"log"
-	"sort"
-	"strings"
+	log "github.com/sirupsen/logrus"
 )
 
 // ErrLatestNotFound happens when users asks backup-fetch LATEST, but there is no backups

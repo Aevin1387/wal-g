@@ -3,14 +3,15 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/wal-g/wal-g"
-	"github.com/wal-g/wal-g/test_tools"
-	"log"
 	"os"
 	"path/filepath"
 	"runtime/pprof"
 	"strconv"
 	"time"
+
+	log "github.com/sirupsen/logrus"
+	"github.com/wal-g/wal-g"
+	"github.com/wal-g/wal-g/test_tools"
 )
 
 var profile bool

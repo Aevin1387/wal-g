@@ -3,16 +3,17 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"github.com/jackc/pgx"
-	"github.com/wal-g/wal-g"
 	"io"
-	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/jackc/pgx"
+	log "github.com/sirupsen/logrus"
+	"github.com/wal-g/wal-g"
 )
 
 func RemoveContents(dir string) error {

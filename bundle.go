@@ -3,14 +3,15 @@ package walg
 import (
 	"archive/tar"
 	"fmt"
-	"github.com/jackc/pgx"
-	"github.com/pkg/errors"
 	"io"
-	"log"
 	"os"
 	"path/filepath"
 	"strings"
 	"sync"
+
+	"github.com/jackc/pgx"
+	"github.com/pkg/errors"
+	log "github.com/sirupsen/logrus"
 )
 
 // A Bundle represents the directory to

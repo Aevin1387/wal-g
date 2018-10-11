@@ -5,9 +5,10 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"log"
 	"os"
 	"testing"
+
+	log "github.com/sirupsen/logrus"
 )
 
 const (

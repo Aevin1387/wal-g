@@ -4,7 +4,8 @@ package walg
 
 import (
 	"io"
-	"log"
+
+	log "github.com/sirupsen/logrus"
 )
 
 func NewLzoReader(r io.Reader) (io.ReadCloser, error) {

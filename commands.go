@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"log"
 	"os"
 	"path"
 	"path/filepath"
@@ -15,10 +14,13 @@ import (
 	"text/tabwriter"
 	"time"
 
+	log "github.com/sirupsen/logrus"
+
+	"bytes"
+	"sync"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/pkg/errors"
-	"sync"
-	"bytes"
 )
 
 // HandleDelete is invoked to perform wal-g delete

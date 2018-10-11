@@ -2,16 +2,17 @@ package walg
 
 import (
 	"fmt"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/s3/s3manager"
-	"github.com/aws/aws-sdk-go/service/s3/s3manager/s3manageriface"
-	"github.com/pkg/errors"
 	"io"
-	"log"
 	"os"
 	"path/filepath"
 	"strings"
 	"sync"
+
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+	"github.com/aws/aws-sdk-go/service/s3/s3manager/s3manageriface"
+	"github.com/pkg/errors"
+	log "github.com/sirupsen/logrus"
 )
 
 // TarUploader contains fields associated with uploading tarballs.

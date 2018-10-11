@@ -3,10 +3,11 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/wal-g/wal-g"
-	"log"
 	"os"
 	"runtime/pprof"
+
+	log "github.com/sirupsen/logrus"
+	"github.com/wal-g/wal-g"
 )
 
 var profile bool

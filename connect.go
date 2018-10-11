@@ -1,8 +1,9 @@
 package walg
 
 import (
-	"log"
 	"regexp"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/jackc/pgx"
 	"github.com/pkg/errors"
