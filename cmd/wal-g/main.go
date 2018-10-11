@@ -144,6 +144,6 @@ func main() {
 	} else if command == "delete" {
 		walg.HandleDelete(pre, all)
 	} else {
-		l.Fatalf("Command '%s' is unsupported by WAL-G.", command)
+		log.Fatalf("Command '%s' is unsupported by WAL-G.", command)
 	}
 }
