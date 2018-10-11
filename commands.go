@@ -608,7 +608,7 @@ func UploadWALFile(tarUploader *TarUploader, dirArc string, pre *S3Prefix, verif
 	if pre.PreventWalOverwrite {
 		if checkWALOverwrite(pre, tarUploader, dirArc) {
 			if !bkgUpload {
-				log.Fatalf("WAL file '%s' already archived, contents differ, unable to overwrite", dirArc)
+				log.Panicf("WAL file '%s' already archived, contents differ, unable to overwrite", dirArc)
 			}
 			log.Warnf("WAL file '%s' already archived, contents differ, unable to overwrite", dirArc)
 			return
