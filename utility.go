@@ -126,7 +126,7 @@ func GetSentinelUserData() interface{} {
 	var out interface{}
 	err := json.Unmarshal([]byte(dataStr), &out)
 	if err != nil {
-		log.Println("WARNING! Unable to parse WALG_SENTINEL_USER_DATA as JSON")
+		log.Warn("Unable to parse WALG_SENTINEL_USER_DATA as JSON")
 		return dataStr
 	}
 	return out

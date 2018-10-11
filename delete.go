@@ -54,7 +54,7 @@ func ParseDeleteArguments(args []string, fallBackFunc func()) (result DeleteComm
 		params = params[1:]
 	}
 	if len(params) < 1 {
-		log.Print("Backup name not specified")
+		log.Error("Backup name not specified")
 		fallBackFunc()
 		return
 	}
@@ -62,7 +62,7 @@ func ParseDeleteArguments(args []string, fallBackFunc func()) (result DeleteComm
 	result.target = params[0]
 	if t, err := time.Parse(time.RFC3339, result.target); err == nil {
 		if t.After(time.Now()) {
-			log.Println("Cannot delete before future date")
+			log.Error("Cannot delete before future date")
 			fallBackFunc()
 		}
 		result.beforeTime = &t
@@ -76,12 +76,12 @@ func ParseDeleteArguments(args []string, fallBackFunc func()) (result DeleteComm
 	if result.retain {
 		number, err := strconv.Atoi(result.target)
 		if err != nil {
-			log.Println("Cannot parse target number ", number)
+			log.Error("Cannot parse target number ", number)
 			fallBackFunc()
 			return
 		}
 		if number <= 0 {
-			log.Println("Cannot retain 0") // Consider allowing to delete everything
+			log.Error("Cannot retain 0") // Consider allowing to delete everything
 			fallBackFunc()
 			return
 		}
@@ -110,9 +110,9 @@ func deleteBeforeTarget(target string, bk *Backup, pre *S3Prefix, findFull bool,
 	skipLine := len(backups)
 	for i, b := range backups {
 		if skip {
-			log.Printf("%v skipped\n", b.Name)
+			log.Infof("%v skipped", b.Name)
 		} else {
-			log.Printf("%v will be deleted\n", b.Name)
+			log.Infof("%v will be deleted", b.Name)
 		}
 		if b.Name == target {
 			skip = false
@@ -126,7 +126,7 @@ func deleteBeforeTarget(target string, bk *Backup, pre *S3Prefix, findFull bool,
 			deleteBackupsBefore(backups, skipLine, pre)
 		}
 	} else {
-		log.Printf("Dry run finished.\n")
+		log.Info("Dry run finished.")
 	}
 }
 

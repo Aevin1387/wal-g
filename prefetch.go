@@ -1,7 +1,6 @@
 package walg
 
 import (
-	"fmt"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -22,7 +21,7 @@ func HandleWALPrefetch(pre *S3Prefix, walFileName string, location string) {
 	for i := 0; i < getMaxDownloadConcurrency(8); i++ {
 		fileName, err = NextWALFileName(fileName)
 		if err != nil {
-			log.Println("WAL-prefetch failed: ", err, " file: ", fileName)
+			log.Errorf("WAL-prefetch failed: %s file: %s", err, fileName)
 		}
 		wg.Add(1)
 		go prefetchFile(location, pre, fileName, wg)
@@ -37,7 +36,7 @@ func HandleWALPrefetch(pre *S3Prefix, walFileName string, location string) {
 func prefetchFile(location string, pre *S3Prefix, walFileName string, wg *sync.WaitGroup) {
 	defer func() {
 		if r := recover(); r != nil {
-			fmt.Println("Prefetch unsuccessful ", walFileName, r)
+			log.Errorf("Prefetch unsuccessful %s %s", walFileName, r)
 		}
 		wg.Done()
 	}()
@@ -51,7 +50,7 @@ func prefetchFile(location string, pre *S3Prefix, walFileName string, wg *sync.W
 		return
 	}
 
-	log.Println("WAL-prefetch file: ", walFileName)
+	log.Infof("WAL-prefetch file: %s", walFileName)
 	os.MkdirAll(runningLocation, 0755)
 
 	err := DownloadAndDecompressWALFile(pre, walFileName, oldPath)
@@ -87,7 +86,7 @@ func forkPrefetch(walFileName string, location string) {
 	err := cmd.Start()
 
 	if err != nil {
-		log.Println("WAL-prefetch failed: ", err)
+		log.Errorf("WAL-prefetch failed: %s", err)
 	}
 }
 
@@ -124,7 +123,7 @@ func (c FileSystemCleaner) Remove(file string) {
 func cleanupPrefetchDirectories(walFileName string, location string, cleaner Cleaner) {
 	timelineId, logSegNo, err := ParseWALFileName(walFileName)
 	if err != nil {
-		log.Println("WAL-prefetch cleanup failed: ", err, " file: ", walFileName)
+		log.Errorf("WAL-prefetch cleanup failed: %s file: %s", err, walFileName)
 		return
 	}
 	prefetchLocation, runningLocation, _, _ := getPrefetchLocations(location, walFileName)
@@ -135,7 +134,7 @@ func cleanupPrefetchDirectories(walFileName string, location string, cleaner Cle
 func cleanupPrefetchDirectory(directory string, timelineId uint32, logSegNo uint64, cleaner Cleaner) {
 	files, err := cleaner.GetFiles(directory)
 	if err != nil {
-		log.Println("WAL-prefetch cleanup failed, : ", err, " cannot enumerate files in dir: ", directory)
+		log.Errorf("WAL-prefetch cleanup failed: %s cannot enumerate files in dir: %s", err, directory)
 	}
 
 	for _, f := range files {

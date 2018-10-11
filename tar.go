@@ -2,13 +2,14 @@ package walg
 
 import (
 	"archive/tar"
-	"fmt"
-	"github.com/pkg/errors"
 	"io"
 	"os"
 	"path"
 	"path/filepath"
 	"strings"
+
+	"github.com/pkg/errors"
+	log "github.com/sirupsen/logrus"
 )
 
 // TarInterpreter behaves differently
@@ -28,7 +29,7 @@ type FileTarInterpreter struct {
 // Returns the first error encountered. Calls fsync after each file
 // is written successfully.
 func (tarInterpreter *FileTarInterpreter) Interpret(tr io.Reader, cur *tar.Header) error {
-	fmt.Println(cur.Name)
+	log.Infof("Interpret: %s", cur.Name)
 	targetPath := path.Join(tarInterpreter.NewDir, cur.Name)
 	// this path is only used for increment restoration
 	incrementalPath := path.Join(tarInterpreter.IncrementalBaseDir, cur.Name)

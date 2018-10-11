@@ -3,6 +3,7 @@ package walg
 import (
 	"archive/tar"
 	"io"
+	"strings"
 
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
@@ -105,7 +106,7 @@ func ExtractAll(tarInterpreter TarInterpreter, files []ReaderMaker) error {
 		for e := range collectAll {
 			if e != nil {
 				if err != nil {
-					log.Println(err)
+					log.Error(err)
 				}
 				err = e
 			}
@@ -191,10 +192,10 @@ func tryExtractFiles(files []ReaderMaker, tarInterpreter TarInterpreter, collect
 				collectAll <- err2
 			} else {
 				if err1 != nil {
-					log.Println(err1)
+					log.Error(err1)
 				}
 				if err2 != nil {
-					log.Println(err2)
+					log.Error(err2)
 				}
 				if err1 != nil || err2 != nil {
 					failed = append(failed, val)
@@ -207,11 +208,12 @@ func tryExtractFiles(files []ReaderMaker, tarInterpreter TarInterpreter, collect
 		<-sem
 	}
 	if len(failed) > 0 {
-		log.Println("Iteration finished, failed tars: ")
+		failedTars := make([]string, len(failed))
 		for _, f := range failed {
-			log.Print(f.Path(), ",")
+			append(failedTars, f.Path())
 		}
-		log.Print("\n")
+
+		log.Warnf("Iteration finished, failed tars: %s", strings.Join(failedTars))
 	}
 	return
 }

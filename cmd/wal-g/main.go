@@ -13,7 +13,6 @@ import (
 var profile bool
 var mem bool
 var help bool
-var l *log.Logger
 var helpMsg = "  backup-fetch\tfetch a backup from S3\n" +
 	"  backup-push\tstarts and uploads a finished backup to S3\n" +
 	"  backup-list\tprints available backups\n" +
@@ -65,7 +64,7 @@ func main() {
 
 	all := flag.Args()
 	if len(all) < 1 {
-		l.Fatalf("Please choose a command:\n%s", helpMsg)
+		log.Fatalf("Please choose a command:\n%s", helpMsg)
 	}
 	command := all[0]
 	firstArgument := ""
@@ -96,7 +95,7 @@ func main() {
 			fmt.Println(walg.DeleteUsageText)
 			os.Exit(1)
 		default:
-			l.Fatalf("Command '%s' is unsupported by WAL-G.\n\n", command)
+			log.Fatalf("Command '%s' is unsupported by WAL-G.\n\n", command)
 		}
 	}
 

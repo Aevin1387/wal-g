@@ -1,7 +1,6 @@
 package walg
 
 import (
-	"fmt"
 	"io"
 	"os"
 	"path/filepath"
@@ -48,7 +47,7 @@ func NewTarUploader(bucket, server, compressionMethod string) *TarUploader {
 func (tarUploader *TarUploader) Finish() {
 	tarUploader.waitGroup.Wait()
 	if !tarUploader.Success {
-		log.Printf("WAL-G could not complete upload.\n")
+		log.Errorf("WAL-G could not complete upload.")
 	}
 }
 
@@ -99,7 +98,7 @@ func (tarUploader *TarUploader) UploadWal(path string, pre *S3Prefix, verify boo
 	}()
 
 	tarUploader.Finish()
-	fmt.Println("WAL PATH:", dstPath)
+	log.Infof("WAL PATH: %s", dstPath)
 	if verify {
 		sum := reader.(*MD5Reader).Sum()
 		archive := &Archive{
@@ -118,7 +117,7 @@ func (tarUploader *TarUploader) UploadWal(path string, pre *S3Prefix, verify boo
 		if sum != trimETag {
 			log.Fatalf("WAL verification failed: md5 %s ETag %s", sum, trimETag)
 		}
-		fmt.Println("ETag ", trimETag)
+		log.Infof("ETag %s", trimETag)
 	}
 	return dstPath, err
 }
@@ -157,9 +156,9 @@ func (tarUploader *TarUploader) upload(input *s3manager.UploadInput, path string
 	}
 
 	if multierr, ok := e.(s3manager.MultiUploadFailure); ok {
-		log.Printf("upload: failed to upload '%s' with UploadID '%s'.", path, multierr.UploadID())
+		log.Errorf("upload: failed to upload '%s' with UploadID '%s'.", path, multierr.UploadID())
 	} else {
-		log.Printf("upload: failed to upload '%s': %s.", path, e.Error())
+		log.Errorf("upload: failed to upload '%s': %s.", path, e.Error())
 	}
 	return e
 }

@@ -81,7 +81,7 @@ func scanOnce(u *BgUploader) {
 
 	files, err := ioutil.ReadDir(filepath.Join(u.dir, archiveStatus))
 	if err != nil {
-		log.Print("Error of parallel upload: ", err)
+		log.Errorf("Error of parallel upload: %s", err)
 		return
 	}
 
@@ -123,7 +123,7 @@ func (uploader *BgUploader) Upload(info os.FileInfo) {
 	done := filepath.Join(uploader.dir, archiveStatus, walfilename+done)
 	err := os.Rename(ready, done)
 	if err != nil {
-		log.Print("Error renaming .ready to .done: ", err)
+		log.Errorf("Error renaming .ready to .done: %s", err)
 	}
 
 	atomic.AddInt32(&uploader.totalUploaded, 1)

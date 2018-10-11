@@ -137,9 +137,9 @@ func deepCompare(file1, file2 string) bool {
 		}
 
 		if !bytes.Equal(b1, b2) {
-			log.Printf("Bytes at %v differ\n", chunkNumber*chunkSize)
-			log.Println(b1)
-			log.Println(b2)
+			log.Warnf("Bytes at %v differ", chunkNumber*chunkSize)
+			log.Warn(b1)
+			log.Warn(b2)
 			return false
 		}
 		chunkNumber++
