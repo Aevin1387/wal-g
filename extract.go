@@ -210,10 +210,10 @@ func tryExtractFiles(files []ReaderMaker, tarInterpreter TarInterpreter, collect
 	if len(failed) > 0 {
 		failedTars := make([]string, len(failed))
 		for _, f := range failed {
-			append(failedTars, f.Path())
+			failedTars = append(failedTars, f.Path())
 		}
 
-		log.Warnf("Iteration finished, failed tars: %s", strings.Join(failedTars))
+		log.Warnf("Iteration finished, failed tars: %s", strings.Join(failedTars, ","))
 	}
 	return
 }
