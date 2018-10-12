@@ -16,8 +16,6 @@ import (
 	"io"
 	"os"
 	"strings"
-
-	log "github.com/sirupsen/logrus"
 )
 
 const (
@@ -248,7 +246,7 @@ func ReadDatabaseFile(fileName string, lsn *uint64, isNew bool) (io.ReadCloser, 
 	if err != nil {
 		if err == ErrInvalidBlock {
 			file.Close()
-			log.Warnf("File %v has invalid pages, fallback to full backup\n", fileName)
+			Logger.Warnf("File %v has invalid pages, fallback to full backup\n", fileName)
 			file, err = os.Open(fileName)
 			if err != nil {
 				return nil, false, fileSize, err
@@ -263,7 +261,7 @@ func ReadDatabaseFile(fileName string, lsn *uint64, isNew bool) (io.ReadCloser, 
 
 // ApplyFileIncrement changes pages according to supplied change map file
 func ApplyFileIncrement(fileName string, increment io.Reader) error {
-	log.Info("Incrementing " + fileName)
+	Logger.Info("Incrementing " + fileName)
 	header := make([]byte, sizeofInt32)
 	fileSizeBytes := make([]byte, sizeofInt64)
 	diffBlockBytes := make([]byte, sizeofInt32)

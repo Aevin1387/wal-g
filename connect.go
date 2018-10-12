@@ -3,8 +3,6 @@ package walg
 import (
 	"regexp"
 
-	log "github.com/sirupsen/logrus"
-
 	"github.com/jackc/pgx"
 	"github.com/pkg/errors"
 )
@@ -36,7 +34,7 @@ func Connect() (*pgx.Conn, error) {
 	}
 
 	if archiveMode != "on" && archiveMode != "always" {
-		log.Warn("It seems your archive_mode is not enabled. This will cause inconsistent backup. Please consider configuring WAL archiving.")
+		Logger.Warn("It seems your archive_mode is not enabled. This will cause inconsistent backup. Please consider configuring WAL archiving.")
 	} else {
 		var archiveCommand string
 
@@ -47,7 +45,7 @@ func Connect() (*pgx.Conn, error) {
 		}
 
 		if len(archiveCommand) == 0 || archiveCommand == "(disabled)" {
-			log.Warn("It seems your archive_command is not configured. This will cause inconsistent backup. Please consider configuring WAL archiving.")
+			Logger.Warn("It seems your archive_command is not configured. This will cause inconsistent backup. Please consider configuring WAL archiving.")
 		}
 	}
 

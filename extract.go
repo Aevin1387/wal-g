@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
-	log "github.com/sirupsen/logrus"
 )
 
 // EmptyWriteIgnorer handles 0 byte write in LZ4 package
@@ -106,7 +105,7 @@ func ExtractAll(tarInterpreter TarInterpreter, files []ReaderMaker) error {
 		for e := range collectAll {
 			if e != nil {
 				if err != nil {
-					log.Error(err)
+					Logger.Error(err)
 				}
 				err = e
 			}
@@ -117,12 +116,12 @@ func ExtractAll(tarInterpreter TarInterpreter, files []ReaderMaker) error {
 
 	// here we try to restart idempotent tar reader 3 times
 	currentRun := files
-	log.Info("Running first extraction")
+	Logger.Info("Running first extraction")
 	failed := tryExtractFiles(currentRun, tarInterpreter, collectAll, false, con)
 
 	// Lowering parallelism for failed tars
 	for len(failed) > 0 && con > 1 {
-		log.Infof("Running second extract for %d failed files", len(failed))
+		Logger.Infof("Running second extract for %d failed files", len(failed))
 		currentRun = failed
 		con /= 2
 		failed = tryExtractFiles(failed, tarInterpreter, collectAll, false, con)
@@ -130,13 +129,13 @@ func ExtractAll(tarInterpreter TarInterpreter, files []ReaderMaker) error {
 
 	// If we have failed tars we iterate until we see a progress
 	for len(failed) > 0 && len(failed) < len(currentRun) {
-		log.Infof("Running third extract for %d failed files", len(failed))
+		Logger.Infof("Running third extract for %d failed files", len(failed))
 		currentRun = failed
 		failed = tryExtractFiles(failed, tarInterpreter, collectAll, false, 1)
 	}
 	// Last attempt to obtain err
 	if len(failed) > 0 {
-		log.Infof("Running final extract for %d failed files", len(failed))
+		Logger.Infof("Running final extract for %d failed files", len(failed))
 		tryExtractFiles(failed, tarInterpreter, collectAll, true, 1)
 	}
 	return err
@@ -192,10 +191,10 @@ func tryExtractFiles(files []ReaderMaker, tarInterpreter TarInterpreter, collect
 				collectAll <- err2
 			} else {
 				if err1 != nil {
-					log.Error(err1)
+					Logger.Error(err1)
 				}
 				if err2 != nil {
-					log.Error(err2)
+					Logger.Error(err2)
 				}
 				if err1 != nil || err2 != nil {
 					failed = append(failed, val)
@@ -213,7 +212,7 @@ func tryExtractFiles(files []ReaderMaker, tarInterpreter TarInterpreter, collect
 			failedTars = append(failedTars, f.Path())
 		}
 
-		log.Warnf("Iteration finished, failed tars: %s", strings.Join(failedTars, ","))
+		Logger.Warnf("Iteration finished, failed tars: %s", strings.Join(failedTars, ","))
 	}
 	return
 }

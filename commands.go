@@ -14,8 +14,6 @@ import (
 	"text/tabwriter"
 	"time"
 
-	log "github.com/sirupsen/logrus"
-
 	"bytes"
 	"sync"
 
@@ -38,7 +36,7 @@ func HandleDelete(pre *S3Prefix, args []string) {
 		} else {
 			backups, err := bk.GetBackups()
 			if err != nil {
-				log.Fatal(err)
+				Logger.Fatal(err)
 			}
 			for _, b := range backups {
 				if b.Time.Before(*cfg.beforeTime) {
@@ -46,21 +44,21 @@ func HandleDelete(pre *S3Prefix, args []string) {
 					return
 				}
 			}
-			log.Infof("No backups before %d", *cfg.beforeTime)
+			Logger.Infof("No backups before %d", *cfg.beforeTime)
 		}
 	}
 	if cfg.retain {
 		number, err := strconv.Atoi(cfg.target)
 		if err != nil {
-			log.Fatal("Unable to parse number of backups: ", err)
+			Logger.Fatal("Unable to parse number of backups: ", err)
 		}
 		backups, err := bk.GetBackups()
 		if err != nil {
-			log.Fatal(err)
+			Logger.Fatal(err)
 		}
 		if cfg.full {
 			if len(backups) <= number {
-				log.Infof("Have only %v backups.\n", number)
+				Logger.Infof("Have only %v backups.\n", number)
 			}
 			left := number
 			for _, b := range backups {
@@ -73,10 +71,10 @@ func HandleDelete(pre *S3Prefix, args []string) {
 					left--
 				}
 			}
-			log.Infof("Scanned all backups but didn't have %v full.", number)
+			Logger.Infof("Scanned all backups but didn't have %v full.", number)
 		} else {
 			if len(backups) <= number {
-				log.Infof("Have only %v backups.\n", number)
+				Logger.Infof("Have only %v backups.\n", number)
 			} else {
 				cfg.target = backups[number-1].Name
 				deleteBeforeTarget(cfg.target, bk, pre, cfg.findFull, nil, cfg.dryrun)
@@ -93,7 +91,7 @@ func HandleBackupList(pre *S3Prefix) {
 	}
 	backups, err := bk.GetBackups()
 	if err != nil {
-		log.Fatal(err)
+		Logger.Fatal(err)
 	}
 
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', 0)
@@ -114,7 +112,7 @@ func HandleBackupFetch(backupName string, pre *S3Prefix, dirArc string, mem bool
 	if mem {
 		f, err := os.Create("mem.prof")
 		if err != nil {
-			log.Fatal(err)
+			Logger.Fatal(err)
 		}
 
 		pprof.WriteHeapProfile(f)
@@ -137,10 +135,10 @@ func deltaFetchRecursion(backupName string, pre *S3Prefix, dirArc string) (lsn *
 
 		exists, err := bk.CheckExistence()
 		if err != nil {
-			log.Fatalf("%+v\n", err)
+			Logger.Fatalf("%+v\n", err)
 		}
 		if !exists {
-			log.Fatalf("Backup '%s' does not exist.\n", *bk.Name)
+			Logger.Fatalf("Backup '%s' does not exist.\n", *bk.Name)
 		}
 
 		// Find the LATEST valid backup (checks against JSON file and grabs backup name) and extract to DIRARC.
@@ -152,16 +150,16 @@ func deltaFetchRecursion(backupName string, pre *S3Prefix, dirArc string) (lsn *
 
 		latest, err := bk.GetLatest()
 		if err != nil {
-			log.Fatalf("%+v\n", err)
+			Logger.Fatalf("%+v\n", err)
 		}
 		bk.Name = aws.String(latest)
 	}
 	var dto = fetchSentinel(*bk.Name, bk, pre)
 
 	if dto.IsIncremental() {
-		log.Infof("Delta from %v at LSN %x", *dto.IncrementFrom, *dto.IncrementFromLSN)
+		Logger.Infof("Delta from %v at LSN %x", *dto.IncrementFrom, *dto.IncrementFromLSN)
 		deltaFetchRecursion(*dto.IncrementFrom, pre, dirArc)
-		log.Infof("%v fetched. Upgrading from LSN %x to LSN %x", *dto.IncrementFrom, *dto.IncrementFromLSN, dto.LSN)
+		Logger.Infof("%v fetched. Upgrading from LSN %x to LSN %x", *dto.IncrementFrom, *dto.IncrementFromLSN, dto.LSN)
 	}
 
 	unwrapBackup(bk, dirArc, pre, dto)
@@ -206,24 +204,24 @@ func unwrapBackup(backup *Backup, dirArc string, pre *S3Prefix, sentinelDto S3Ta
 		filepath.Walk(dirArc, searchLambda)
 
 		if !empty {
-			log.Fatalf("Directory %v for delta base must be empty", dirArc)
+			Logger.Fatalf("Directory %v for delta base must be empty", dirArc)
 		}
 	} else {
 		defer func() {
 			err := os.RemoveAll(incrementBase)
 			if err != nil {
-				log.Fatal(err)
+				Logger.Fatal(err)
 			}
 		}()
 
 		err := os.MkdirAll(incrementBase, os.FileMode(0777))
 		if err != nil {
-			log.Fatal(err)
+			Logger.Fatal(err)
 		}
 
 		files, err := ioutil.ReadDir(dirArc)
 		if err != nil {
-			log.Fatal(err)
+			Logger.Fatal(err)
 		}
 
 		for _, f := range files {
@@ -231,7 +229,7 @@ func unwrapBackup(backup *Backup, dirArc string, pre *S3Prefix, sentinelDto S3Ta
 			if objName != "increment_base" {
 				err := os.Rename(path.Join(dirArc, objName), path.Join(incrementBase, objName))
 				if err != nil {
-					log.Fatal(err)
+					Logger.Fatal(err)
 				}
 			}
 		}
@@ -240,13 +238,13 @@ func unwrapBackup(backup *Backup, dirArc string, pre *S3Prefix, sentinelDto S3Ta
 			if !fd.IsSkipped {
 				continue
 			}
-			log.Warnf("Skipped file %v\n", fileName)
+			Logger.Warnf("Skipped file %v\n", fileName)
 			targetPath := path.Join(dirArc, fileName)
 			// this path is only used for increment restoration
 			incrementalPath := path.Join(incrementBase, fileName)
 			err = MoveFileAndCreateDirs(incrementalPath, targetPath, fileName)
 			if err != nil {
-				log.Fatalf("%s. Failed to move skipped file for %s %s", err, targetPath, fileName)
+				Logger.Fatalf("%s. Failed to move skipped file for %s %s", err, targetPath, fileName)
 			}
 		}
 
@@ -254,7 +252,7 @@ func unwrapBackup(backup *Backup, dirArc string, pre *S3Prefix, sentinelDto S3Ta
 
 	keys, err := backup.GetKeys()
 	if err != nil {
-		log.Fatalf("%+v\n", err)
+		Logger.Fatalf("%+v\n", err)
 	}
 
 	fileTarInterpreter := &FileTarInterpreter{
@@ -291,25 +289,25 @@ func unwrapBackup(backup *Backup, dirArc string, pre *S3Prefix, sentinelDto S3Ta
 	// Extract all compressed tar members except `pg_control.tar.lz4` if WALG version backup.
 	err = ExtractAll(fileTarInterpreter, out)
 	if serr, ok := err.(*UnsupportedFileTypeError); ok {
-		log.Fatalf("%v\n", serr)
+		Logger.Fatalf("%v\n", serr)
 	} else if err != nil {
-		log.Fatalf("%+v\n", err)
+		Logger.Fatalf("%+v\n", err)
 	}
 	// Check name for backwards compatibility. Will check for `pg_control` if WALG version of backup.
 	re := regexp.MustCompile(`^([^_]+._{1}[^_]+._{1})`)
 	match := re.FindString(*backup.Name)
 	if match == "" || sentinelDto.IsIncremental() {
 		if pgControlKey == nil {
-			log.Fatal("Expect pg_control archive, but not found")
+			Logger.Fatal("Expect pg_control archive, but not found")
 		}
 
 		err = extractPgControl(backup, pre, fileTarInterpreter, *pgControlKey)
 		if err != nil {
-			log.Fatalf("%+v\n", err)
+			Logger.Fatalf("%+v\n", err)
 		}
 	}
 
-	log.Info("Backup extraction complete.")
+	Logger.Info("Backup extraction complete.")
 }
 
 func getDeltaConfig() (maxDeltas int, fromFull bool) {
@@ -318,7 +316,7 @@ func getDeltaConfig() (maxDeltas int, fromFull bool) {
 	if hasSteps {
 		maxDeltas, err = strconv.Atoi(stepsStr)
 		if err != nil {
-			log.Fatal("Unable to parse WALG_DELTA_MAX_STEPS ", err)
+			Logger.Fatal("Unable to parse WALG_DELTA_MAX_STEPS ", err)
 		}
 	}
 	origin, hasOrigin := os.LookupEnv("WALG_DELTA_ORIGIN")
@@ -328,7 +326,7 @@ func getDeltaConfig() (maxDeltas int, fromFull bool) {
 		case "LATEST_FULL":
 			fromFull = false
 		default:
-			log.Fatal("Unknown WALG_DELTA_ORIGIN:", origin)
+			Logger.Fatal("Unknown WALG_DELTA_ORIGIN:", origin)
 		}
 	}
 	return
@@ -353,7 +351,7 @@ func HandleBackupPush(dirArc string, tu *TarUploader, pre *S3Prefix) {
 		latest, err = bk.GetLatest()
 		if err != ErrLatestNotFound {
 			if err != nil {
-				log.Fatalf("%+v\n", err)
+				Logger.Fatalf("%+v\n", err)
 			}
 			sentinelDto = fetchSentinel(latest, bk, pre)
 			if sentinelDto.IncrementCount != nil {
@@ -361,17 +359,17 @@ func HandleBackupPush(dirArc string, tu *TarUploader, pre *S3Prefix) {
 			}
 
 			if incrementCount > maxDeltas {
-				log.Info("Reached max delta steps. Doing full backup.")
+				Logger.Info("Reached max delta steps. Doing full backup.")
 				sentinelDto = S3TarBallSentinelDto{}
 			} else if sentinelDto.LSN == nil {
-				log.Warn("LATEST backup was made without support for delta feature. Fallback to full backup with LSN marker for future deltas.")
+				Logger.Warn("LATEST backup was made without support for delta feature. Fallback to full backup with LSN marker for future deltas.")
 			} else {
 				if fromFull {
-					log.Info("Delta will be made from full backup.")
+					Logger.Info("Delta will be made from full backup.")
 					latest = *sentinelDto.IncrementFullName
 					sentinelDto = fetchSentinel(latest, bk, pre)
 				}
-				log.Infof("Delta backup from %v with LSN %x. \n", latest, *sentinelDto.LSN)
+				Logger.Infof("Delta backup from %v with LSN %x. \n", latest, *sentinelDto.LSN)
 			}
 		}
 	}
@@ -389,11 +387,11 @@ func HandleBackupPush(dirArc string, tu *TarUploader, pre *S3Prefix) {
 	// Connect to postgres and start/finish a nonexclusive backup.
 	conn, err := Connect()
 	if err != nil {
-		log.Fatalf("%+v\n", err)
+		Logger.Fatalf("%+v\n", err)
 	}
 	name, lsn, pgVersion, err := bundle.StartBackup(conn, time.Now().String())
 	if err != nil {
-		log.Fatalf("%+v\n", err)
+		Logger.Fatalf("%+v\n", err)
 	}
 
 	if len(latest) > 0 && sentinelDto.LSN != nil {
@@ -411,24 +409,24 @@ func HandleBackupPush(dirArc string, tu *TarUploader, pre *S3Prefix) {
 	}
 
 	bundle.StartQueue()
-	log.Info("Walking ...")
+	Logger.Info("Walking ...")
 	err = filepath.Walk(dirArc, bundle.TarWalk)
 	if err != nil {
-		log.Fatalf("%+v\n", err)
+		Logger.Fatalf("%+v\n", err)
 	}
 	err = bundle.FinishQueue()
 	if err != nil {
-		log.Fatalf("%+v\n", err)
+		Logger.Fatalf("%+v\n", err)
 	}
 	// Upload `pg_control`.
 	err = bundle.HandleSentinel()
 	if err != nil {
-		log.Fatalf("%+v\n", err)
+		Logger.Fatalf("%+v\n", err)
 	}
 	// Stops backup and write/upload postgres `backup_label` and `tablespace_map` Files
 	finishLsn, err := bundle.HandleLabelFiles(conn)
 	if err != nil {
-		log.Fatalf("%+v\n", err)
+		Logger.Fatalf("%+v\n", err)
 	}
 
 	timelineChanged := bundle.CheckTimelineChanged(conn)
@@ -456,7 +454,7 @@ func HandleBackupPush(dirArc string, tu *TarUploader, pre *S3Prefix) {
 	// Wait for all uploads to finish.
 	err = bundle.TarBall.Finish(sentinel)
 	if err != nil {
-		log.Fatalf("%+v\n", err)
+		Logger.Fatalf("%+v\n", err)
 	}
 }
 
@@ -473,25 +471,25 @@ func HandleWALFetch(pre *S3Prefix, walFileName string, location string, triggerP
 	for {
 		if stat, err := os.Stat(prefetched); err == nil {
 			if stat.Size() != int64(WalSegmentSize) {
-				log.Error("WAL-G: Prefetch error: wrong file size of prefetched file ", stat.Size())
+				Logger.Error("WAL-G: Prefetch error: wrong file size of prefetched file ", stat.Size())
 				break
 			}
 
 			err = os.Rename(prefetched, location)
 			if err != nil {
-				log.Fatalf("%+v\n", err)
+				Logger.Fatalf("%+v\n", err)
 			}
 
 			err := checkWALFileMagic(location)
 			if err != nil {
-				log.Error("Prefetched file contain errors", err)
+				Logger.Error("Prefetched file contain errors", err)
 				os.Remove(location)
 				break
 			}
 
 			return
 		} else if !os.IsNotExist(err) {
-			log.Fatalf("%+v\n", err)
+			Logger.Fatalf("%+v\n", err)
 		}
 
 		// We have race condition here, if running is renamed here, but it's OK
@@ -516,7 +514,7 @@ func HandleWALFetch(pre *S3Prefix, walFileName string, location string, triggerP
 
 	err := DownloadAndDecompressWALFile(pre, walFileName, location)
 	if err != nil {
-		log.Fatalf("%+v\n", err)
+		Logger.Fatalf("%+v\n", err)
 	}
 }
 
@@ -608,20 +606,20 @@ func UploadWALFile(tarUploader *TarUploader, dirArc string, pre *S3Prefix, verif
 	if pre.PreventWalOverwrite {
 		if checkWALOverwrite(pre, tarUploader, dirArc) {
 			if !bkgUpload {
-				log.Panicf("WAL file '%s' already archived, contents differ, unable to overwrite", dirArc)
+				Logger.Panicf("WAL file '%s' already archived, contents differ, unable to overwrite", dirArc)
 			}
-			log.Warnf("WAL file '%s' already archived, contents differ, unable to overwrite", dirArc)
+			Logger.Warnf("WAL file '%s' already archived, contents differ, unable to overwrite", dirArc)
 			return
 		}
 	}
 
 	path, err := tarUploader.UploadWal(dirArc, pre, verify)
 	if re, ok := err.(CompressingPipeWriterError); ok {
-		log.Fatalf("Could not upload '%s' due to compression error.\n%+v\n", path, re)
+		Logger.Fatalf("Could not upload '%s' due to compression error.\n%+v\n", path, re)
 	}
 	if err != nil {
-		log.Errorf("upload: could not upload '%s'", path)
-		log.Fatalf("%v", err)
+		Logger.Errorf("upload: could not upload '%s'", path)
+		Logger.Fatalf("%v", err)
 	}
 }
 
@@ -629,7 +627,7 @@ func checkWALOverwrite(pre *S3Prefix, tarUploader *TarUploader, dirArc string) (
 	archiveReader, exists, err := tryDownloadWALFile(pre,
 		sanitizePath(tarUploader.server+WalPath+filepath.Base(dirArc)+"."+tarUploader.compressor.FileExtension()))
 	if err != nil {
-		log.Fatalf("%+v\n", err)
+		Logger.Fatalf("%+v\n", err)
 	}
 	if exists {
 		archived := &bytes.Buffer{}
@@ -642,13 +640,13 @@ func checkWALOverwrite(pre *S3Prefix, tarUploader *TarUploader, dirArc string) (
 		localBytes, err := ioutil.ReadAll(local)
 
 		if err != nil {
-			log.Fatalf("%+v", err)
+			Logger.Fatalf("%+v", err)
 		}
 
 		if !bytes.Equal(archived.Bytes(), localBytes) {
 			return true
 		} else {
-			log.Warnf("WAL file '%s' already archived, archived content equals", dirArc)
+			Logger.Warnf("WAL file '%s' already archived, archived content equals", dirArc)
 			return false
 		}
 	}

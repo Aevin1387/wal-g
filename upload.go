@@ -19,7 +19,6 @@ import (
 
 	"log/syslog"
 
-	log "github.com/sirupsen/logrus"
 	lSyslog "github.com/sirupsen/logrus/hooks/syslog"
 )
 
@@ -198,11 +197,11 @@ func Configure() (*TarUploader, *S3Prefix, error) {
 	if useSyslog != "" {
 		syslogNetwork := os.Getenv("WALG_SYSLOG_NETWORK")
 		syslogAddr := os.Getenv("WALG_SYSLOG_ADDR")
-		log.Infof("Setting up Syslog w/ network: %s and addr %s", syslogNetwork, syslogAddr)
+		Logger.Infof("Setting up Syslog w/ network: %s and addr %s", syslogNetwork, syslogAddr)
 		hook, err := lSyslog.NewSyslogHook(syslogNetwork, syslogAddr, syslog.LOG_INFO, "")
 
 		if err == nil {
-			log.AddHook(hook)
+			Logger.Logger.AddHook(hook)
 		}
 	}
 

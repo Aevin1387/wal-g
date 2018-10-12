@@ -10,7 +10,6 @@ import (
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/pkg/errors"
-	log "github.com/sirupsen/logrus"
 )
 
 // ErrLatestNotFound happens when users asks backup-fetch LATEST, but there is no backups
@@ -190,16 +189,16 @@ func fetchSentinel(backupName string, bk *Backup, pre *S3Prefix) (dto S3TarBallS
 	}
 	prevBackup, err := previousBackupReader.Reader()
 	if err != nil {
-		log.Fatalf("%+v\n", err)
+		Logger.Fatalf("%+v\n", err)
 	}
 	sentinelDto, err := ioutil.ReadAll(prevBackup)
 	if err != nil {
-		log.Fatalf("%+v\n", err)
+		Logger.Fatalf("%+v\n", err)
 	}
 
 	err = json.Unmarshal(sentinelDto, &dto)
 	if err != nil {
-		log.Fatalf("%+v\n", err)
+		Logger.Fatalf("%+v\n", err)
 	}
 	return
 }

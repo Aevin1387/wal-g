@@ -8,8 +8,6 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
-
-	log "github.com/sirupsen/logrus"
 )
 
 // BgUploader represents the state of concurrent WAL upload
@@ -81,7 +79,7 @@ func scanOnce(u *BgUploader) {
 
 	files, err := ioutil.ReadDir(filepath.Join(u.dir, archiveStatus))
 	if err != nil {
-		log.Errorf("Error of parallel upload: %s", err)
+		Logger.Errorf("Error of parallel upload: %s", err)
 		return
 	}
 
@@ -123,7 +121,7 @@ func (uploader *BgUploader) Upload(info os.FileInfo) {
 	done := filepath.Join(uploader.dir, archiveStatus, walfilename+done)
 	err := os.Rename(ready, done)
 	if err != nil {
-		log.Errorf("Error renaming .ready to .done: %s", err)
+		Logger.Errorf("Error renaming .ready to .done: %s", err)
 	}
 
 	atomic.AddInt32(&uploader.totalUploaded, 1)

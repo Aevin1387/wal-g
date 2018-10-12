@@ -10,7 +10,6 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/pkg/errors"
-	log "github.com/sirupsen/logrus"
 )
 
 // S3TarBall represents a tar file that is
@@ -60,13 +59,13 @@ func (tarBall *S3TarBall) CloseTar() error {
 	if err != nil {
 		return errors.Wrap(err, "CloseTar: failed to close underlying writer")
 	}
-	log.Infof("Finished writing part %d.\n", tarBall.partCount)
+	Logger.Infof("Finished writing part %d.\n", tarBall.partCount)
 	return nil
 }
 func (tarBall *S3TarBall) AwaitUploads() {
 	tarBall.tarUploader.waitGroup.Wait()
 	if !tarBall.tarUploader.Success {
-		log.Fatal("Unable to complete uploads")
+		Logger.Fatal("Unable to complete uploads")
 	}
 }
 
@@ -79,7 +78,7 @@ func (tarBall *S3TarBall) StartUpload(name string, crypter Crypter) io.WriteClos
 	path := tarUploader.server + BaseBackupsPath + tarBall.backupName + "/tar_partitions/" + name
 	input := tarUploader.createUploadInput(path, NewNetworkLimitReader(pipeReader))
 
-	log.Infof("Starting part %d ...", tarBall.partCount)
+	Logger.Infof("Starting part %d ...", tarBall.partCount)
 
 	tarUploader.waitGroup.Add(1)
 	go func() {
@@ -87,10 +86,10 @@ func (tarBall *S3TarBall) StartUpload(name string, crypter Crypter) io.WriteClos
 
 		err := tarUploader.upload(input, path)
 		if compressingError, ok := err.(CompressingPipeWriterError); ok {
-			log.Errorf("FATAL: Could not upload '%s' due to compression error\n%+v", path, compressingError)
+			Logger.Errorf("FATAL: Could not upload '%s' due to compression error\n%+v", path, compressingError)
 		}
 		if err != nil {
-			log.Errorf("FATAL upload: could not upload '%s'\n%v", path, err)
+			Logger.Errorf("FATAL upload: could not upload '%s'\n%v", path, err)
 		}
 	}()
 
@@ -98,7 +97,7 @@ func (tarBall *S3TarBall) StartUpload(name string, crypter Crypter) io.WriteClos
 		encryptedWriter, err := crypter.Encrypt(pipeWriter)
 
 		if err != nil {
-			log.Fatalf("upload: encryption error %s", err)
+			Logger.Fatalf("upload: encryption error %s", err)
 		}
 
 		return &CascadeWriteCloser{tarUploader.compressor.NewWriter(encryptedWriter), &CascadeWriteCloser{encryptedWriter, pipeWriter}}
@@ -164,20 +163,20 @@ func (tarBall *S3TarBall) Finish(sentinelDto *S3TarBallSentinelDto) error {
 
 			e := tarUploader.upload(input, path)
 			if e != nil {
-				log.Errorf("upload: could not upload '%s'", path)
-				log.Fatal("S3TarBall Finish: json failed to upload")
+				Logger.Errorf("upload: could not upload '%s'", path)
+				Logger.Fatal("S3TarBall Finish: json failed to upload")
 			}
 		}()
 
 		tarUploader.Finish()
 	} else {
-		log.Infof("Uploaded %d compressed tar Files.", tarBall.partCount)
-		log.Warnf("Sentinel was not uploaded %v", name)
+		Logger.Infof("Uploaded %d compressed tar Files.", tarBall.partCount)
+		Logger.Warnf("Sentinel was not uploaded %v", name)
 		return errors.New("Sentinel was not uploaded due to timeline change during backup")
 	}
 
 	if err == nil && tarUploader.Success {
-		log.Infof("Uploaded %d compressed tar Files.", tarBall.partCount)
+		Logger.Infof("Uploaded %d compressed tar Files.", tarBall.partCount)
 	}
 	return err
 }

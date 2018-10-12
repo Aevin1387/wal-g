@@ -8,7 +8,6 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
-	log "github.com/sirupsen/logrus"
 )
 
 // ExcludedFilenames is a list of excluded members from the bundled backup.
@@ -59,7 +58,7 @@ func HandleTar(bundle TarBundle, path string, info os.FileInfo, crypter Crypter)
 		}
 
 		hdr.Name = strings.TrimPrefix(path, tarBall.Trim())
-		log.Infof("HandleTar: %s", hdr.Name)
+		Logger.Infof("HandleTar: %s", hdr.Name)
 
 		if info.Mode().IsRegular() {
 			baseFiles := bundle.GetIncrementBaseFiles()
@@ -75,7 +74,7 @@ func HandleTar(bundle TarBundle, path string, info os.FileInfo, crypter Crypter)
 			if wasInBase && (time.Equal(bf.MTime)) {
 				// File was not changed since previous backup
 
-				log.Info("Skipped due to unchanged modification time")
+				Logger.Info("Skipped due to unchanged modification time")
 				bundle.GetFiles().Store(hdr.Name, BackupFileDescription{IsSkipped: true, IsIncremented: false, MTime: time})
 
 			} else {
@@ -144,7 +143,7 @@ func HandleTar(bundle TarBundle, path string, info os.FileInfo, crypter Crypter)
 		}
 
 		hdr.Name = strings.TrimPrefix(path, tarBall.Trim())
-		log.Infof("HandleTar: %s", hdr.Name)
+		Logger.Infof("HandleTar: %s", hdr.Name)
 
 		err = tarWriter.WriteHeader(hdr)
 		if err != nil {

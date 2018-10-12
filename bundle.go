@@ -10,7 +10,6 @@ import (
 
 	"github.com/jackc/pgx"
 	"github.com/pkg/errors"
-	log "github.com/sirupsen/logrus"
 )
 
 // A Bundle represents the directory to
@@ -143,7 +142,7 @@ func (bundle *Bundle) CheckTimelineChanged(conn *pgx.Conn) bool {
 	if bundle.Replica {
 		timeline, err := readTimeline(conn)
 		if err != nil {
-			log.Warnf("Unable to check timeline change. Sentinel for the backup will not be uploaded.")
+			Logger.Warnf("Unable to check timeline change. Sentinel for the backup will not be uploaded.")
 			return true
 		}
 
@@ -151,7 +150,7 @@ func (bundle *Bundle) CheckTimelineChanged(conn *pgx.Conn) bool {
 		// https://www.postgresql.org/message-id/flat/BF2AD4A8-E7F5-486F-92C8-A6959040DEB6%40yandex-team.ru#BF2AD4A8-E7F5-486F-92C8-A6959040DEB6@yandex-team.ru
 		// Following check is the very pessimistic approach on replica backup invalidation
 		if timeline != bundle.Timeline {
-			log.Warnf("Timeline has changed since backup start. Sentinel for the backup will not be uploaded.")
+			Logger.Warnf("Timeline has changed since backup start. Sentinel for the backup will not be uploaded.")
 			return true
 		}
 	}
@@ -194,7 +193,7 @@ func (bundle *Bundle) StartBackup(conn *pgx.Conn, backup string) (backupName str
 func (bundle *Bundle) TarWalk(path string, info os.FileInfo, err error) error {
 	if err != nil {
 		if os.IsNotExist(err) {
-			log.Errorf("%s deleted dring filepath walk", path)
+			Logger.Errorf("%s deleted dring filepath walk", path)
 			return nil
 		}
 		return errors.Wrap(err, "TarWalk: walk failed")
@@ -233,7 +232,7 @@ func (bundle *Bundle) HandleSentinel() error {
 	}
 
 	hdr.Name = strings.TrimPrefix(path, tarBall.Trim())
-	log.Infof("HandleSentinel: %s", hdr.Name)
+	Logger.Infof("HandleSentinel: %s", hdr.Name)
 
 	err = tarWriter.WriteHeader(hdr)
 	if err != nil {
@@ -313,7 +312,7 @@ func (bundle *Bundle) HandleLabelFiles(conn *pgx.Conn) (uint64, error) {
 	if err != nil {
 		return 0, errors.Wrap(err, "HandleLabelFiles: copy failed")
 	}
-	log.Infof("HandleLabelFiles lhdr: %s", lhdr.Name)
+	Logger.Infof("HandleLabelFiles lhdr: %s", lhdr.Name)
 
 	shdr := &tar.Header{
 		Name:     "tablespace_map",
@@ -330,7 +329,7 @@ func (bundle *Bundle) HandleLabelFiles(conn *pgx.Conn) (uint64, error) {
 	if err != nil {
 		return 0, errors.Wrap(err, "HandleLabelFiles: copy failed")
 	}
-	log.Infof("HandleLabelFiles shdr: %s", shdr.Name)
+	Logger.Infof("HandleLabelFiles shdr: %s", shdr.Name)
 
 	err = tarBall.CloseTar()
 	if err != nil {

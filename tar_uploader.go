@@ -11,7 +11,6 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager/s3manageriface"
 	"github.com/pkg/errors"
-	log "github.com/sirupsen/logrus"
 )
 
 // TarUploader contains fields associated with uploading tarballs.
@@ -47,7 +46,7 @@ func NewTarUploader(bucket, server, compressionMethod string) *TarUploader {
 func (tarUploader *TarUploader) Finish() {
 	tarUploader.waitGroup.Wait()
 	if !tarUploader.Success {
-		log.Errorf("WAL-G could not complete upload.")
+		Logger.Errorf("WAL-G could not complete upload.")
 	}
 }
 
@@ -98,7 +97,7 @@ func (tarUploader *TarUploader) UploadWal(path string, pre *S3Prefix, verify boo
 	}()
 
 	tarUploader.Finish()
-	log.Infof("WAL PATH: %s", dstPath)
+	Logger.Infof("WAL PATH: %s", dstPath)
 	if verify {
 		sum := reader.(*MD5Reader).Sum()
 		archive := &Archive{
@@ -107,17 +106,17 @@ func (tarUploader *TarUploader) UploadWal(path string, pre *S3Prefix, verify boo
 		}
 		eTag, err := archive.GetETag()
 		if err != nil {
-			log.Fatalf("Unable to verify WAL %s", err)
+			Logger.Fatalf("Unable to verify WAL %s", err)
 		}
 		if eTag == nil {
-			log.Fatalf("Unable to verify WAL: nil ETag ")
+			Logger.Fatalf("Unable to verify WAL: nil ETag ")
 		}
 
 		trimETag := strings.Trim(*eTag, "\"")
 		if sum != trimETag {
-			log.Fatalf("WAL verification failed: md5 %s ETag %s", sum, trimETag)
+			Logger.Fatalf("WAL verification failed: md5 %s ETag %s", sum, trimETag)
 		}
-		log.Infof("ETag %s", trimETag)
+		Logger.Infof("ETag %s", trimETag)
 	}
 	return dstPath, err
 }
@@ -156,9 +155,9 @@ func (tarUploader *TarUploader) upload(input *s3manager.UploadInput, path string
 	}
 
 	if multierr, ok := e.(s3manager.MultiUploadFailure); ok {
-		log.Errorf("upload: failed to upload '%s' with UploadID '%s'.", path, multierr.UploadID())
+		Logger.Errorf("upload: failed to upload '%s' with UploadID '%s'.", path, multierr.UploadID())
 	} else {
-		log.Errorf("upload: failed to upload '%s': %s.", path, e.Error())
+		Logger.Errorf("upload: failed to upload '%s': %s.", path, e.Error())
 	}
 	return e
 }

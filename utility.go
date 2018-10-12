@@ -10,7 +10,7 @@ import (
 	"strings"
 
 	"github.com/aws/aws-sdk-go/service/s3"
-	log "github.com/sirupsen/logrus"
+	logrus "github.com/sirupsen/logrus"
 )
 
 const (
@@ -24,6 +24,10 @@ const (
 	CompressedBlockMaxSize = 20 << 20
 	NotFoundAWSErrorCode   = "NotFound"
 )
+
+var Logger = logrus.WithFields(logrus.Fields{
+	"APP-NAME": "wal-g",
+})
 
 // Empty is used for channel signaling.
 type Empty struct{}
@@ -126,7 +130,7 @@ func GetSentinelUserData() interface{} {
 	var out interface{}
 	err := json.Unmarshal([]byte(dataStr), &out)
 	if err != nil {
-		log.Warn("Unable to parse WALG_SENTINEL_USER_DATA as JSON")
+		Logger.Warn("Unable to parse WALG_SENTINEL_USER_DATA as JSON")
 		return dataStr
 	}
 	return out
@@ -144,7 +148,7 @@ func getMaxConcurrency(key string, defaultValue int) int {
 		con, err = strconv.Atoi(conc)
 
 		if err != nil {
-			log.Panic("Unknown concurrency number ", err)
+			Logger.Panic("Unknown concurrency number ", err)
 		}
 	} else {
 		if defaultValue > 0 {

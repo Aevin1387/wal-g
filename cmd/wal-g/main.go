@@ -6,7 +6,7 @@ import (
 	"os"
 	"runtime/pprof"
 
-	log "github.com/sirupsen/logrus"
+	logrus "github.com/sirupsen/logrus"
 	"github.com/wal-g/wal-g"
 )
 
@@ -35,7 +35,7 @@ func init() {
 	flag.BoolVar(&showVersionVerbose, "version-verbose", false, "\tLong version")
 	flag.BoolVar(&showVersionVerbose, "vv", false, "\tLong version")
 
-	log.SetOutput(os.Stdout)
+	logrus.SetOutput(os.Stdout)
 }
 
 var WalgVersion = "devel"
@@ -63,7 +63,7 @@ func main() {
 
 	all := flag.Args()
 	if len(all) < 1 {
-		log.Fatalf("Please choose a command:\n%s", helpMsg)
+		walg.Logger.Fatalf("Please choose a command:\n%s", helpMsg)
 	}
 	command := all[0]
 	firstArgument := ""
@@ -94,7 +94,7 @@ func main() {
 			fmt.Println(walg.DeleteUsageText)
 			os.Exit(1)
 		default:
-			log.Fatalf("Command '%s' is unsupported by WAL-G.\n\n", command)
+			walg.Logger.Fatalf("Command '%s' is unsupported by WAL-G.\n\n", command)
 		}
 	}
 
@@ -110,7 +110,7 @@ func main() {
 	if profile {
 		f, err := os.Create("cpu.prof")
 		if err != nil {
-			log.Fatal(err)
+			walg.Logger.Fatal(err)
 		}
 		pprof.StartCPUProfile(f)
 		defer pprof.StopCPUProfile()
@@ -120,7 +120,7 @@ func main() {
 	// Checks that environment variables are properly set.
 	tarUploader, pre, err := walg.Configure()
 	if err != nil {
-		log.Fatalf("FATAL: %+v\n", err)
+		walg.Logger.Fatalf("FATAL: %+v\n", err)
 	}
 
 	fmt.Println("BUCKET:", *pre.Bucket)
@@ -143,6 +143,6 @@ func main() {
 	} else if command == "delete" {
 		walg.HandleDelete(pre, all)
 	} else {
-		log.Fatalf("Command '%s' is unsupported by WAL-G.", command)
+		walg.Logger.Fatalf("Command '%s' is unsupported by WAL-G.", command)
 	}
 }
