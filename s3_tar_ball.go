@@ -87,10 +87,10 @@ func (tarBall *S3TarBall) StartUpload(name string, crypter Crypter) io.WriteClos
 
 		err := tarUploader.upload(input, path)
 		if compressingError, ok := err.(CompressingPipeWriterError); ok {
-			log.Fatalf("Could not upload '%s' due to compression error\n%+v", path, compressingError)
+			log.Errorf("FATAL: Could not upload '%s' due to compression error\n%+v", path, compressingError)
 		}
 		if err != nil {
-			log.Fatalf("upload: could not upload '%s'\n%v", path, err)
+			log.Errorf("FATAL upload: could not upload '%s'\n%v", path, err)
 		}
 	}()
 
