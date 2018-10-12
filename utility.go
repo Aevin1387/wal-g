@@ -1,13 +1,16 @@
 package walg
 
 import (
+	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"os"
 	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/aws/aws-sdk-go/service/s3"
 	logrus "github.com/sirupsen/logrus"
@@ -33,6 +36,9 @@ type Empty struct{}
 
 // NilWriter to /dev/null
 type NilWriter struct{}
+
+// SyslogFormatter
+type SyslogFormatter struct{}
 
 // Write to /dev/null
 func (nw *NilWriter) Write(p []byte) (n int, err error) {
@@ -181,5 +187,43 @@ func fastCopy(dst io.Writer, src io.Reader) (int64, error) {
 		if writingErr != nil || readingErr == io.EOF {
 			return n, writingErr
 		}
+	}
+}
+
+func (f *SyslogFormatter) Format(entry *logrus.Entry) ([]byte, error) {
+	var b *bytes.Buffer
+	if entry.Buffer != nil {
+		b = entry.Buffer
+	} else {
+		b = &bytes.Buffer{}
+	}
+
+	timestampFormat := time.RFC3339
+	f.appendValue(b, entry.Time.Format(timestampFormat), false)
+	f.appendValue(b, entry.Data["hostname"], false)
+	f.appendValue(b, entry.Data["appname"], false)
+	f.appendValue(b, entry.Level.String(), false)
+	f.appendValue(b, "-", false)
+	f.appendValue(b, entry.Data["command"], false)
+	f.appendValue(b, "-", false)
+	f.appendValue(b, entry.Message, true)
+
+	b.WriteByte('\n')
+	return b.Bytes(), nil
+}
+
+func (f *SyslogFormatter) appendValue(b *bytes.Buffer, value interface{}, needsQuoting bool) {
+	if b.Len() > 0 {
+		b.WriteByte(' ')
+	}
+	stringVal, ok := value.(string)
+	if !ok {
+		stringVal = fmt.Sprint(value)
+	}
+
+	if !needsQuoting {
+		b.WriteString(stringVal)
+	} else {
+		b.WriteString(fmt.Sprintf("%q", stringVal))
 	}
 }
