@@ -46,7 +46,7 @@ const (
 
 func main() {
 	os.Setenv("WALE_S3_PREFIX", os.Getenv("WALE_S3_PREFIX")+"/"+strconv.FormatInt(time.Now().UnixNano(), 10))
-	tu, pre, err := walg.Configure()
+	tu, pre, err := walg.Configure("delta-test")
 	if err != nil {
 		log.Fatal(err)
 	}

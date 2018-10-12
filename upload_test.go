@@ -82,7 +82,7 @@ func TestConfigureDeepBucket(t *testing.T) {
 func doConfigureWithBuсketPath(t *testing.T, bucketPath string, expectedServer string) {
 	//Test empty environment variables
 	setEmpty(t)
-	tu, pre, err := walg.Configure()
+	tu, pre, err := walg.Configure("test-config-with-bucket-path")
 	if _, ok := err.(*walg.UnsetEnvVarError); !ok {
 		t.Errorf("upload: Expected error 'UnsetEnvVarError' but got %s", err)
 	}
@@ -103,7 +103,7 @@ func doConfigureWithBuсketPath(t *testing.T, bucketPath string, expectedServer 
 	if err != nil {
 		t.Log(err)
 	}
-	_, _, err = walg.Configure()
+	_, _, err = walg.Configure("test-config-with-bucket-path")
 	if err != nil {
 		t.Errorf("upload: expected error to be '<nil>' for Minio but got %s", err)
 	}
@@ -112,7 +112,7 @@ func doConfigureWithBuсketPath(t *testing.T, bucketPath string, expectedServer 
 	if err != nil {
 		t.Log(err)
 	}
-	_, _, err = walg.Configure()
+	_, _, err = walg.Configure("test-config-with-bucket-path")
 	if err == nil {
 		t.Errorf("upload: Expected to fail on fake url")
 	}
@@ -121,7 +121,7 @@ func doConfigureWithBuсketPath(t *testing.T, bucketPath string, expectedServer 
 	if err != nil {
 		t.Log(err)
 	}
-	tu, pre, err = walg.Configure()
+	tu, pre, err = walg.Configure("test-config-with-bucket-path")
 	if err != nil {
 		t.Errorf("upload: unexpected error %v", err)
 	}
@@ -146,7 +146,7 @@ func doConfigureWithBuсketPath(t *testing.T, bucketPath string, expectedServer 
 	if err != nil {
 		t.Log(err)
 	}
-	tu, pre, err = walg.Configure()
+	tu, pre, err = walg.Configure("test-config-with-bucket-path")
 	if err != nil {
 		t.Log(err)
 	}

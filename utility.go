@@ -25,9 +25,7 @@ const (
 	NotFoundAWSErrorCode   = "NotFound"
 )
 
-var Logger = logrus.WithFields(logrus.Fields{
-	"APP-NAME": "wal-g",
-})
+var Logger = logrus.NewEntry(logrus.New())
 
 // Empty is used for channel signaling.
 type Empty struct{}

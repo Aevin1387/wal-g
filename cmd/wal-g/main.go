@@ -118,7 +118,7 @@ func main() {
 
 	// Configure and start S3 session with bucket, region, and path names.
 	// Checks that environment variables are properly set.
-	tarUploader, pre, err := walg.Configure()
+	tarUploader, pre, err := walg.Configure(command)
 	if err != nil {
 		walg.Logger.Fatalf("FATAL: %+v\n", err)
 	}

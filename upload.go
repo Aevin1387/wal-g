@@ -19,6 +19,7 @@ import (
 
 	"log/syslog"
 
+	logrus "github.com/sirupsen/logrus"
 	lSyslog "github.com/sirupsen/logrus/hooks/syslog"
 )
 
@@ -57,7 +58,7 @@ func findS3BucketRegion(bucket string, config *aws.Config) (string, error) {
 // WALE_S3_PREFIX
 //
 // Able to configure the upload part size in the S3 uploader.
-func Configure() (*TarUploader, *S3Prefix, error) {
+func Configure(command string) (*TarUploader, *S3Prefix, error) {
 	waleS3Prefix := os.Getenv("WALE_S3_PREFIX")
 	if waleS3Prefix == "" {
 		return nil, nil, &UnsetEnvVarError{names: []string{"WALE_S3_PREFIX"}}
@@ -201,6 +202,16 @@ func Configure() (*TarUploader, *S3Prefix, error) {
 		hook, err := lSyslog.NewSyslogHook(syslogNetwork, syslogAddr, syslog.LOG_INFO, "")
 
 		if err == nil {
+			logrus.SetFormatter(&logrus.JSONFormatter{})
+			hostname, err := os.Hostname()
+			if err == nil {
+				Logger = Logger.WithFields(logrus.Fields{
+					"appname":  "wal-g",
+					"hostname": hostname,
+					"command":  command,
+				})
+			}
+
 			Logger.Logger.AddHook(hook)
 		}
 	}

@@ -75,7 +75,7 @@ func main() {
 		os.MkdirAll(outDir, 0766)
 
 	} else if s3 {
-		tu, _, _ := walg.Configure()
+		tu, _, _ := walg.Configure("backup")
 		c, err := walg.Connect()
 		if err != nil {
 			panic(err)

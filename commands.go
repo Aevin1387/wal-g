@@ -44,7 +44,7 @@ func HandleDelete(pre *S3Prefix, args []string) {
 					return
 				}
 			}
-			Logger.Infof("No backups before %d", *cfg.beforeTime)
+			Logger.Infof("No backups before %s", *cfg.beforeTime)
 		}
 	}
 	if cfg.retain {
