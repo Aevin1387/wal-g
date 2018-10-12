@@ -196,8 +196,10 @@ func Configure() (*TarUploader, *S3Prefix, error) {
 
 	useSyslog, ok := os.LookupEnv("WALG_SYSLOG")
 	if useSyslog != "" {
-		log.Info("Setting up Syslog")
-		hook, err := lSyslog.NewSyslogHook("", "", syslog.LOG_INFO, "")
+		syslogNetwork := os.LookupEnv("WALG_SYSLOG_NETWORK")
+		syslogAddr := os.LookupEnv("WALG_SYSLOG_ADDR")
+		log.Infof("Setting up Syslog w/ network: %s and addr %s", syslogNetwork, syslogAddr)
+		hook, err := lSyslog.NewSyslogHook(syslogNetwork, syslogAddr, syslog.LOG_INFO, "")
 
 		if err == nil {
 			log.AddHook(hook)
