@@ -35,7 +35,7 @@ func init() {
 	flag.BoolVar(&showVersionVerbose, "version-verbose", false, "\tLong version")
 	flag.BoolVar(&showVersionVerbose, "vv", false, "\tLong version")
 
-	log.SetOutput(os.Stdout)
+	log.SetOutput(os.Stderr)
 	log.SetLevel(log.WarnLevel)
 }
 
