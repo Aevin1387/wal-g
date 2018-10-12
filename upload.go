@@ -16,6 +16,11 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3/s3manager/s3manageriface"
 	"github.com/pkg/errors"
 	"golang.org/x/time/rate"
+
+	"log/syslog"
+
+	log "github.com/sirupsen/logrus"
+	lSyslog "github.com/sirupsen/logrus/hooks/syslog"
 )
 
 // MaxRetries limit upload and download retries during interaction with S3
@@ -188,6 +193,15 @@ func Configure() (*TarUploader, *S3Prefix, error) {
 	}
 
 	uploader.UploaderApi = CreateUploader(pre.Svc, 20*1024*1024, con) //default 10 concurrency streams at 20MB
+
+	useSyslog, ok := os.LookupEnv("WALG_SYSLOG")
+	if useSyslog != "" {
+		hook, err := lSyslog.NewSyslogHook("", "", syslog.LOG_INFO, "")
+
+		if err == nil {
+			log.Hooks.Add(hook)
+		}
+	}
 
 	return uploader, pre, err
 }
