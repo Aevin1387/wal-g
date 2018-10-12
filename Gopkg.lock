@@ -114,9 +114,12 @@
   revision = "c605e284fe17294bda444b34710735b29d1a9d90"
 
 [[projects]]
-  digest = "1:3f53e9e4dfbb664cd62940c9c4b65a2171c66acd0b7621a1a6b8e78513525a52"
+  digest = "1:edd2cd814d8bb5564f12f661fdcdebce60ddf422461e81ff38f7c2d6c5d2bbcf"
   name = "github.com/sirupsen/logrus"
-  packages = ["."]
+  packages = [
+    ".",
+    "hooks/syslog",
+  ]
   pruneopts = "UT"
   revision = "ad15b42461921f1fb3529b058c6786c6a45d5162"
   version = "v1.1.1"
@@ -192,6 +195,7 @@
     "github.com/pierrec/lz4",
     "github.com/pkg/errors",
     "github.com/sirupsen/logrus",
+    "github.com/sirupsen/logrus/hooks/syslog",
     "github.com/ulikunitz/xz/lzma",
     "golang.org/x/crypto/openpgp",
     "golang.org/x/time/rate",
