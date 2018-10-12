@@ -194,10 +194,10 @@ func Configure() (*TarUploader, *S3Prefix, error) {
 
 	uploader.UploaderApi = CreateUploader(pre.Svc, 20*1024*1024, con) //default 10 concurrency streams at 20MB
 
-	useSyslog, ok := os.LookupEnv("WALG_SYSLOG")
+	_useSyslog, ok := os.LookupEnv("WALG_SYSLOG")
 	if ok {
-		syslogNetwork, ok := os.LookupEnv("WALG_SYSLOG_NETWORK")
-		syslogAddr, ok := os.LookupEnv("WALG_SYSLOG_ADDR")
+		syslogNetwork, _ok := os.LookupEnv("WALG_SYSLOG_NETWORK")
+		syslogAddr, _ok := os.LookupEnv("WALG_SYSLOG_ADDR")
 		log.Infof("Setting up Syslog w/ network: %s and addr %s", syslogNetwork, syslogAddr)
 		hook, err := lSyslog.NewSyslogHook(syslogNetwork, syslogAddr, syslog.LOG_INFO, "")
 
