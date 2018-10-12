@@ -199,7 +199,7 @@ func Configure(command string) (*TarUploader, *S3Prefix, error) {
 		syslogNetwork := os.Getenv("WALG_SYSLOG_NETWORK")
 		syslogAddr := os.Getenv("WALG_SYSLOG_ADDR")
 		Logger.Infof("Setting up Syslog w/ network: %s and addr %s", syslogNetwork, syslogAddr)
-		hook, err := lSyslog.NewSyslogHook(syslogNetwork, syslogAddr, syslog.LOG_LOCAL7, "")
+		hook, err := lSyslog.NewSyslogHook(syslogNetwork, syslogAddr, syslog.LOG_LOCAL7, "wal-g")
 
 		if err == nil {
 			LogInstance.SetFormatter(&SyslogFormatter{})
