@@ -25,7 +25,8 @@ const (
 	NotFoundAWSErrorCode   = "NotFound"
 )
 
-var Logger = logrus.NewEntry(logrus.New())
+var LogInstance = logrus.New()
+var Logger = logrus.NewEntry(LogInstance)
 
 // Empty is used for channel signaling.
 type Empty struct{}

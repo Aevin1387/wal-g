@@ -202,7 +202,7 @@ func Configure(command string) (*TarUploader, *S3Prefix, error) {
 		hook, err := lSyslog.NewSyslogHook(syslogNetwork, syslogAddr, syslog.LOG_INFO, "")
 
 		if err == nil {
-			logrus.SetFormatter(&logrus.JSONFormatter{})
+			LogInstance.SetFormatter(&logrus.JSONFormatter{})
 			hostname, err := os.Hostname()
 			if err == nil {
 				Logger = Logger.WithFields(logrus.Fields{
