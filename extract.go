@@ -148,6 +148,8 @@ func tryExtractFiles(files []ReaderMaker, tarInterpreter TarInterpreter, collect
 		concurrent <- Empty{}
 	}
 	var crypter OpenPGPCrypter
+	complete := 0
+	total := len(files)
 	for i, val := range files {
 		<-concurrent
 		go func(i int, val ReaderMaker) {
@@ -200,7 +202,9 @@ func tryExtractFiles(files []ReaderMaker, tarInterpreter TarInterpreter, collect
 					failed = append(failed, val)
 				}
 			}
-
+			complete += 1
+			percentage := complete / total
+			Logger.Infof("Extract is %.2f complete", percentage)
 		}(i, val)
 	}
 	for i := 0; i < len(files); i++ {
