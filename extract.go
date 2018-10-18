@@ -203,7 +203,7 @@ func tryExtractFiles(files []ReaderMaker, tarInterpreter TarInterpreter, collect
 				}
 			}
 			complete += 1
-			percentage := float64(complete) / total
+			percentage := (float64(complete) / total) * 100.0
 			Logger.Infof("Extracted %d of %.0f, %.3f complete", complete, total, percentage)
 		}(i, val)
 	}
