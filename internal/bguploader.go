@@ -1,7 +1,6 @@
 package internal
 
 import (
-	"github.com/wal-g/wal-g/internal/tracelog"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -9,6 +8,8 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
+
+	"github.com/wal-g/wal-g/internal/tracelog"
 )
 
 const TotalBgUploadedLimit = 1024
@@ -37,6 +38,44 @@ type BgUploader struct {
 	totalUploaded int32
 
 	mutex sync.Mutex
+
+	walFileCache *walFileCache
+}
+
+type walFile struct {
+	name  string
+	ready bool
+	done  bool
+	fileInfo *FileInfo
+}
+
+type walFileCache struct {
+	files    *[]walFile
+	cachedAt *time.Time
+}
+
+func (u *BgUploader) getFiles() (error) {
+	fileCache := u.walFileCache
+	if fileCache.cachedAt == nil || time.Since(fileCache.cachedAt) > 5 * time.Duration.Minutes() {
+		files, err := ioutil.ReadDir(filepath.Join(u.dir, archiveStatus))
+		if err != nil {
+			return err
+		}
+
+		fileCache.files = make([]walFile, len(files))
+		for _, f := range files {
+			name := f.Name()
+			fileInfo := WalFileCache{name: name, fileInfo: f}
+			if strings.HasSuffix(name, readySuffix) {
+				fileInfo.ready = true
+			}
+			if strings.HasSuffix(name, done) {
+				fileInfo.done = true
+			}
+			append(fileCache.files, fileInfo)
+		}
+		fileCache.cachedAt = time.Now()
+	}
 }
 
 func NewBgUploader(walFilePath string, maxParallelWorkers int32, uploader *Uploader) *BgUploader {
@@ -51,6 +90,7 @@ func NewBgUploader(walFilePath string, maxParallelWorkers int32, uploader *Uploa
 		uploader,
 		0,
 		sync.Mutex{},
+		walFileCache{}
 	}
 }
 
@@ -74,7 +114,7 @@ func (bgUploader *BgUploader) Stop() {
 	atomic.StoreInt32(&bgUploader.maxParallelWorkers, 0) // stop new jobs
 	bgUploader.mutex.Unlock()
 
-	bgUploader.running.Wait()                            // wait again for those who jumped to the closing door
+	bgUploader.running.Wait() // wait again for those who jumped to the closing door
 }
 
 var readySuffix = ".ready"
@@ -86,18 +126,19 @@ func (bgUploader *BgUploader) scanOnce() {
 	bgUploader.mutex.Lock()
 	defer bgUploader.mutex.Unlock()
 
-	files, err := ioutil.ReadDir(filepath.Join(bgUploader.dir, archiveStatus))
+	err := bgUploader.getFiles()
 	if err != nil {
 		tracelog.ErrorLogger.Print("Error of parallel upload: ", err)
 		return
 	}
+	files := bgUploader.walFileCache.files
 
 	for _, f := range files {
 		if bgUploader.haveNoSlots() {
 			break
 		}
-		name := f.Name()
-		if !strings.HasSuffix(name, readySuffix) {
+		name := f.name
+		if !f.ready {
 			continue
 		}
 		if _, ok := bgUploader.started[name]; ok {
