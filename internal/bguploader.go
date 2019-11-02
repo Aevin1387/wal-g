@@ -39,24 +39,24 @@ type BgUploader struct {
 
 	mutex sync.Mutex
 
-	walFileCache *walFileCache
+	walFileCache walFileCache
 }
 
 type walFile struct {
-	name  string
-	ready bool
-	done  bool
-	fileInfo *FileInfo
+	name     string
+	ready    bool
+	done     bool
+	fileInfo os.FileInfo
 }
 
 type walFileCache struct {
-	files    *[]walFile
-	cachedAt *time.Time
+	files    []walFile
+	cachedAt time.Time
 }
 
-func (u *BgUploader) getFiles() (error) {
+func (u *BgUploader) getFiles() error {
 	fileCache := u.walFileCache
-	if fileCache.cachedAt == nil || time.Since(fileCache.cachedAt) > 5 * time.Duration.Minutes() {
+	if (fileCache.cachedAt == time.Time{} || time.Since(fileCache.cachedAt).Minutes() > 5) {
 		files, err := ioutil.ReadDir(filepath.Join(u.dir, archiveStatus))
 		if err != nil {
 			return err
@@ -65,17 +65,18 @@ func (u *BgUploader) getFiles() (error) {
 		fileCache.files = make([]walFile, len(files))
 		for _, f := range files {
 			name := f.Name()
-			fileInfo := WalFileCache{name: name, fileInfo: f}
+			fileInfo := walFile{name: name, fileInfo: f}
 			if strings.HasSuffix(name, readySuffix) {
 				fileInfo.ready = true
 			}
 			if strings.HasSuffix(name, done) {
 				fileInfo.done = true
 			}
-			append(fileCache.files, fileInfo)
+			fileCache.files = append(fileCache.files, fileInfo)
 		}
 		fileCache.cachedAt = time.Now()
 	}
+	return nil
 }
 
 func NewBgUploader(walFilePath string, maxParallelWorkers int32, uploader *Uploader) *BgUploader {
@@ -90,7 +91,7 @@ func NewBgUploader(walFilePath string, maxParallelWorkers int32, uploader *Uploa
 		uploader,
 		0,
 		sync.Mutex{},
-		walFileCache{}
+		walFileCache{},
 	}
 }
 
@@ -149,7 +150,7 @@ func (bgUploader *BgUploader) scanOnce() {
 		if bgUploader.shouldKeepScanning() {
 			bgUploader.running.Add(1)
 			atomic.AddInt32(&bgUploader.parallelWorkers, 1)
-			go bgUploader.upload(f)
+			go bgUploader.upload(f.fileInfo)
 		}
 	}
 }
