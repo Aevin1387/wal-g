@@ -68,6 +68,7 @@ func (bb *StreamingBaseBackup) Start(verifyChecksum bool, diskLimit int32) (err 
 		NoVerifyChecksums: !verifyChecksum,
 		MaxRate:           diskLimit,
 	}
+	tracelog.DebugLogger.Printf("Start base backup conn: %#v\n", bb.pgConn)
 	result, err := pglogrepl.StartBaseBackup(context.Background(), bb.pgConn, options)
 	if err != nil {
 		return
