@@ -129,6 +129,7 @@ func (bb *StreamingBaseBackup) Upload(uploader *WalUploader, bundleFiles interna
 	bb.uploader = uploader
 	bb.streamer = NewTarballStreamer(bb, bb.maxTarSize, bundleFiles)
 	for {
+		tracelog.DebugLogger.Printf("Upload tbsTar %s", bb.FileName())
 		tbsTar := ioextensions.NewNamedReaderImpl(bb.streamer, bb.FileName())
 		compressedFile := internal.CompressAndEncrypt(tbsTar, bb.uploader.Compressor, internal.ConfigureCrypter())
 		dstPath := fmt.Sprintf("%s.%s", bb.Path(), bb.uploader.Compressor.FileExtension())

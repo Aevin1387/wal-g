@@ -366,8 +366,10 @@ func (bh *BackupHandler) createAndPushRemoteBackup() {
 
 	var tarFileSets internal.TarFileSets
 	if bh.Arguments.withoutFilesMetadata {
+		tracelog.DebugLogger.Println("Tarfileset withoutFilesMetadata")
 		tarFileSets = internal.NewNopTarFileSets()
 	} else {
+		tracelog.DebugLogger.Println("Tarfileset with filesMetadata")
 		tarFileSets = internal.NewRegularTarFileSets()
 	}
 
