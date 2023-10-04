@@ -53,6 +53,7 @@ func CompressAndEncrypt(source io.Reader, compressor compression.Compressor, cry
 	}
 
 	go func() {
+		tracelog.DebugLogger.Println("CompressAndEncrypt pre-FastCopy")
 		_, err := utility.FastCopy(compressedWriter, source)
 
 		if err != nil {
