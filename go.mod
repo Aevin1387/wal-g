@@ -24,8 +24,6 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/greenplum-db/gp-common-go-libs v1.0.4
 	github.com/hashicorp/golang-lru v0.5.4
-	github.com/jackc/pgconn v1.6.5-0.20200823013804-5db484908cf7
-	github.com/jackc/pglogrepl v0.0.0-20210109153808-a78a685a0bff
 	github.com/jackc/pgproto3/v2 v2.0.7
 	github.com/jackc/pgx v3.6.0+incompatible
 	github.com/jedib0t/go-pretty v4.3.0+incompatible
@@ -39,7 +37,7 @@ require (
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.7.0
-	github.com/stretchr/testify v1.8.2
+	github.com/stretchr/testify v1.8.4
 	github.com/ulikunitz/xz v0.5.11
 	github.com/wal-g/json v0.3.1
 	github.com/wal-g/tracelog v0.0.0-20231219102105-60dcd9126592
@@ -58,6 +56,8 @@ require (
 	github.com/ProtonMail/go-crypto v0.0.0-20230426101702-58e86b294756
 	github.com/cactus/go-statsd-client/v5 v5.0.0
 	github.com/google/brotli/go/cbrotli v0.0.0-20220110100810-f4153a09f87c
+	github.com/jackc/pglogrepl v0.0.0-20231111135425-1627ab1b5780
+	github.com/jackc/pgx/v5 v5.0.3
 	github.com/klauspost/compress v1.15.12
 	github.com/ncw/swift/v2 v2.0.2
 	github.com/pkg/profile v1.6.0
@@ -112,7 +112,7 @@ require (
 	github.com/jackc/chunkreader/v2 v2.0.1 // indirect
 	github.com/jackc/pgio v1.0.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
-	github.com/jackc/pgservicefile v0.0.0-20200714003250-2b9c44734f2b // indirect
+	github.com/jackc/pgservicefile v0.0.0-20221227161230-091c0ba34f0a // indirect
 	github.com/jessevdk/go-flags v1.4.0 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/jmoiron/sqlx v1.3.3 // indirect
