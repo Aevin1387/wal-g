@@ -15,13 +15,13 @@ echo "," >> ${FAILOVER_TMP_CONFIG}
 cat ${COMMON_CONFIG} >> ${FAILOVER_TMP_CONFIG}
 /tmp/scripts/wrap_config_file.sh ${FAILOVER_TMP_CONFIG}
 
-/usr/lib/postgresql/10/bin/initdb ${PGDATA}
+/usr/lib/postgresql/15/bin/initdb ${PGDATA}
 
 echo "archive_mode = on" >> ${PGDATA}/postgresql.conf
 echo "archive_command = '/usr/bin/timeout 600 wal-g --config=${FAILOVER_TMP_CONFIG} wal-push %p'" >> ${PGDATA}/postgresql.conf
 echo "archive_timeout = 600" >> ${PGDATA}/postgresql.conf
 
-/usr/lib/postgresql/10/bin/pg_ctl -D ${PGDATA} -w start
+/usr/lib/postgresql/15/bin/pg_ctl -D ${PGDATA} -w start
 
 /tmp/scripts/wait_while_pg_not_ready.sh
 
@@ -39,12 +39,12 @@ wal-g --config=${TMP_CONFIG} st transfer pg-wals --source=failover --target=defa
 
 wal-g --config=${TMP_CONFIG} backup-fetch ${PGDATA} LATEST
 
-echo "restore_command = 'echo \"WAL file restoration: %f, %p\"&& wal-g --config=${TMP_CONFIG} wal-fetch \"%f\" \"%p\"'" > ${PGDATA}/recovery.conf
+echo "restore_command = 'echo \"WAL file restoration: %f, %p\"&& wal-g --config=${TMP_CONFIG} wal-fetch \"%f\" \"%p\"'" > ${PGDATA}/postgresql.conf
 
 wal-g --config=${TMP_CONFIG} st ls -r --target failover
 wal-g --config=${TMP_CONFIG} st ls -r --target default
 
-/usr/lib/postgresql/10/bin/pg_ctl -D ${PGDATA} -w start
+/usr/lib/postgresql/15/bin/pg_ctl -D ${PGDATA} -w start
 /tmp/scripts/wait_while_pg_not_ready.sh
 pg_dumpall -f /tmp/dump2
 

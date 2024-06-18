@@ -10,12 +10,12 @@ cat ${COMMON_CONFIG} >> ${TMP_CONFIG}
 
 wal-g --config=${TMP_CONFIG} delete everything FORCE --confirm
 
-/usr/lib/postgresql/10/bin/initdb ${PGDATA}
+/usr/lib/postgresql/15/bin/initdb ${PGDATA}
 
 echo "archive_mode = on" >> ${PGDATA}/postgresql.conf
 echo "archive_command = 'wal-g --config=${TMP_CONFIG} wal-push %p && echo \"WAL pushing: %p\"'" >> ${PGDATA}/postgresql.conf
 
-/usr/lib/postgresql/10/bin/pg_ctl -D ${PGDATA} -w start
+/usr/lib/postgresql/15/bin/pg_ctl -D ${PGDATA} -w start
 /tmp/scripts/wait_while_pg_not_ready.sh
 
 psql -c "CREATE DATABASE first" postgres
@@ -39,9 +39,9 @@ sleep 10
 
 /tmp/scripts/drop_pg.sh
 wal-g --config=${TMP_CONFIG} backup-fetch ${PGDATA} LATEST --restore-only=first/tbl1,second
-echo "restore_command = 'echo \"WAL file restoration: %f, %p\"&& wal-g --config=${TMP_CONFIG} wal-fetch \"%f\" \"%p\"'" > ${PGDATA}/recovery.conf
+echo "restore_command = 'echo \"WAL file restoration: %f, %p\"&& wal-g --config=${TMP_CONFIG} wal-fetch \"%f\" \"%p\"'" > ${PGDATA}/postgresql.conf
 
-/usr/lib/postgresql/10/bin/pg_ctl -D ${PGDATA} -w start
+/usr/lib/postgresql/15/bin/pg_ctl -D ${PGDATA} -w start
 /tmp/scripts/wait_while_pg_not_ready.sh
 
 if [ "$(psql -t -c "SELECT COUNT(*) FROM tbl1;" -d first -A)" = 20000 ]; then

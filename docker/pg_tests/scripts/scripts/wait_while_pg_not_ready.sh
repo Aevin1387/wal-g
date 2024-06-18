@@ -1,13 +1,13 @@
 #!/bin/bash
 
-STATUS=`/usr/lib/postgresql/10/bin/pg_ctl status | egrep -o "server is running|no server running"`
+STATUS=`/usr/lib/postgresql/15/bin/pg_ctl status | egrep -o "server is running|no server running"`
 
 while [[ "${STATUS}" != "server is running" ]]
 do
   echo "Wait a sec to start server"
   sleep 1
-  usr/lib/postgresql/10/bin/pg_ctl status
-  STATUS=`/usr/lib/postgresql/10/bin/pg_ctl status | egrep -o "server is running|no server running"`
+  usr/lib/postgresql/15/bin/pg_ctl status
+  STATUS=`/usr/lib/postgresql/15/bin/pg_ctl status | egrep -o "server is running|no server running"`
 done
 
 echo "postgresql server is started"

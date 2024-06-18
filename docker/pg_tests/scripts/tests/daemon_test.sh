@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e -x
 
-export PGDATA=/var/lib/postgresql/10/main
+export PGDATA=/var/lib/postgresql/15/main
 
 CONFIG_FILE="/tmp/configs/daemon_test_config.json"
 
@@ -13,8 +13,8 @@ echo "," >> ${TMP_CONFIG}
 cat ${COMMON_CONFIG} >> ${TMP_CONFIG}
 /tmp/scripts/wrap_config_file.sh ${TMP_CONFIG}
 
-/usr/lib/postgresql/10/bin/initdb ${PGDATA}
-/usr/lib/postgresql/10/bin/pg_ctl -D ${PGDATA} -w start
+/usr/lib/postgresql/15/bin/initdb ${PGDATA}
+/usr/lib/postgresql/15/bin/pg_ctl -D ${PGDATA} -w start
 /tmp/scripts/wait_while_pg_not_ready.sh
 
 wal-g --config=${TMP_CONFIG} delete everything FORCE --confirm

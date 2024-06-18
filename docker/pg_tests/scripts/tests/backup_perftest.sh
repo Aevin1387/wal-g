@@ -16,9 +16,9 @@ BACKUP_FETCH_LOGS="/tmp/logs/pg_backup_perftest_fetch"
 echo "" > ${BACKUP_PUSH_LOGS}
 echo "" > ${BACKUP_FETCH_LOGS}
 
-/usr/lib/postgresql/10/bin/initdb "${PGDATA}"
+/usr/lib/postgresql/15/bin/initdb "${PGDATA}"
 
-/usr/lib/postgresql/10/bin/pg_ctl -D "${PGDATA}" -w start
+/usr/lib/postgresql/15/bin/pg_ctl -D "${PGDATA}" -w start
 
 /tmp/scripts/wait_while_pg_not_ready.sh
 
