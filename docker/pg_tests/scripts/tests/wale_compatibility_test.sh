@@ -103,7 +103,8 @@ PGSSLMODE=allow \
 PGDATABASE=postgres \
 PGHOST=/var/run/postgresql \
 WALE_FILE_PREFIX=file://localhost/tmp \
-/usr/bin/wal-g wal-fetch \"%f\" \"%p\"'" > ${PGDATA}/postgresql.conf
+/usr/bin/wal-g wal-fetch \"%f\" \"%p\"'" >> ${PGDATA}/postgresql.conf
+touch "${PGDATA}"/recovery.signal
 
 cp /tmp/conf_files/postgresql.conf ${PGDATA}
 cp /tmp/conf_files/pg_hba.conf ${PGDATA}

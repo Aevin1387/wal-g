@@ -101,7 +101,8 @@ PGDATABASE=postgres \
 PGHOST=/var/run/postgresql \
 WALG_FILE_PREFIX=file://localhost/tmp \
 WALG_LOG_DESTINATION=stderr \
-/usr/bin/wal-g wal-fetch \"%f\" \"%p\"'" > ${PGDATA}/postgresql.conf
+/usr/bin/wal-g wal-fetch \"%f\" \"%p\"'" >> ${PGDATA}/postgresql.conf
+touch "${PGDATA}"/recovery.signal
 
 /usr/lib/postgresql/15/bin/pg_ctl -D ${PGDATA} -w start
 /tmp/scripts/wait_while_pg_not_ready.sh

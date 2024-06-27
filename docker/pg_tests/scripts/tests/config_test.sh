@@ -1,6 +1,7 @@
 #!/bin/sh
 set -e -x
 CONFIG_FILE="/tmp/configs/config_test_config.json"
+rm -f /tmp/storage
 mkdir /tmp/storage
 
 COMMON_CONFIG="/tmp/configs/common_config.json"
@@ -35,7 +36,8 @@ rm -rf "${PGDATA}"
 
 wal-g --config=${TMP_CONFIG} --turbo backup-fetch "${PGDATA}" LATEST
 
-echo "restore_command = 'echo \"WAL file restoration: %f, %p\"&& /usr/bin/wal-g --config=${TMP_CONFIG} wal-fetch \"%f\" \"%p\"'" > "${PGDATA}"/postgresql.conf
+echo "restore_command = 'echo \"WAL file restoration: %f, %p\"&& /usr/bin/wal-g --config=${TMP_CONFIG} wal-fetch \"%f\" \"%p\"'" >> "${PGDATA}"/postgresql.conf
+touch "${PGDATA}"/recovery.signal
 
 /usr/lib/postgresql/15/bin/pg_ctl -D "${PGDATA}" -w start
 

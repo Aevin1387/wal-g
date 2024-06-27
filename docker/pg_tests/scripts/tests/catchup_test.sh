@@ -21,6 +21,8 @@ cat ${COMMON_CONFIG} >> ${TMP_CONFIG}
 
 # init alpha cluster
 rm -rf ${PGDATA_ALPHA}
+rm -rf ${PGDATA_BETA}
+rm -rf ${PGDATA_BETA_1}
 /usr/lib/postgresql/15/bin/initdb ${PGDATA_ALPHA}
 /usr/lib/postgresql/15/bin/pg_ctl -D ${PGDATA_ALPHA} -w start
 PGDATA=${PGDATA_ALPHA} /tmp/scripts/wait_while_pg_not_ready.sh
@@ -44,11 +46,9 @@ cp -r ${PGDATA_BETA} ${PGDATA_BETA_1}
 pushd ${PGDATA_BETA}
 echo "port = ${BETA_PORT}" >> postgresql.conf
 echo "hot_standby = on" >> postgresql.conf
-cat > postgresql.conf << EOF
-primary_conninfo = 'host=127.0.0.1 port=${ALPHA_PORT} user=repl password=password'
-restore_command = 'cp ${PGDATA_BETA}/archive/%f %p'
-promote_trigger_file = '/tmp/postgresql.trigger.${BETA_PORT}'
-EOF
+echo "primary_conninfo = 'host=127.0.0.1 port=${ALPHA_PORT} user=repl password=password'" >> postgresql.conf
+echo "restore_command = 'cp ${PGDATA_BETA}/archive/%f %p'" >> postgresql.conf
+echo "promote_trigger_file = '/tmp/postgresql.trigger.${BETA_PORT}'" >> postgresql.conf
 touch ${PGDATA_BETA}/standby.signal
 /usr/lib/postgresql/15/bin/pg_ctl -D ${PGDATA_BETA} -w start
 popd
@@ -77,11 +77,9 @@ pushd ${PGDATA_BETA}
 echo "port = ${BETA_PORT}" >> postgresql.conf
 echo "hot_standby = on" >> postgresql.conf
 touch ${PGDATA_BETA}/standby.signal
-cat > postgresql.conf << EOF
-primary_conninfo = 'host=127.0.0.1 port=${ALPHA_PORT} user=repl password=password'
-restore_command = 'cp ${PGDATA_BETA}/archive/%f %p'
-promote_trigger_file = '/tmp/postgresql.trigger.${BETA_PORT}'
-EOF
+echo "primary_conninfo = 'host=127.0.0.1 port=${ALPHA_PORT} user=repl password=password'" >> postgresql.conf
+echo "restore_command = 'cp ${PGDATA_BETA}/archive/%f %p'" >> postgresql.conf
+echo "promote_trigger_file = '/tmp/postgresql.trigger.${BETA_PORT}'" >> postgresql.conf
 popd
 
 /usr/lib/postgresql/15/bin/pg_ctl -D ${PGDATA_BETA} -w start
@@ -106,11 +104,9 @@ pushd ${PGDATA_BETA}
 echo "port = ${BETA_PORT}" >> postgresql.conf
 echo "hot_standby = on" >> postgresql.conf
 touch ${PGDATA_BETA}/standby.signal
-cat > postgresql.conf << EOF
-primary_conninfo = 'host=127.0.0.1 port=${ALPHA_PORT} user=repl password=password'
-restore_command = 'cp ${PGDATA_BETA}/archive/%f %p'
-promote_trigger_file = '/tmp/postgresql.trigger.${BETA_PORT}'
-EOF
+echo "primary_conninfo = 'host=127.0.0.1 port=${ALPHA_PORT} user=repl password=password'" >> postgresql.conf
+echo "restore_command = 'cp ${PGDATA_BETA}/archive/%f %p'" >> postgresql.conf
+echo "promote_trigger_file = '/tmp/postgresql.trigger.${BETA_PORT}'" >> postgresql.conf
 popd
 
 /usr/lib/postgresql/15/bin/pg_ctl -D ${PGDATA_BETA} -w start

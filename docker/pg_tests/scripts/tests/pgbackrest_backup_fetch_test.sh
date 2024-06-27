@@ -50,7 +50,8 @@ tar --mtime='UTC 2019-01-01' --sort=name -cf /tmp/pg_data_actual.tar ${PGDATA}
 diff /tmp/pg_data_expected.tar /tmp/pg_data_actual.tar
 echo "Pgbackrest and wal-g backups are the same!"
 
-echo "restore_command = 'wal-g --config=${TMP_CONFIG} pgbackrest wal-fetch \"%f\" \"%p\"'" > ${PGDATA}/postgresql.conf
+echo "restore_command = 'wal-g --config=${TMP_CONFIG} pgbackrest wal-fetch \"%f\" \"%p\"'" >> ${PGDATA}/postgresql.conf
+touch "${PGDATA}"/recovery.signal
 /usr/lib/postgresql/15/bin/pg_ctl -D ${PGDATA} -w start
 /tmp/scripts/wait_while_pg_not_ready.sh
 pg_dumpall -f /tmp/dump2
