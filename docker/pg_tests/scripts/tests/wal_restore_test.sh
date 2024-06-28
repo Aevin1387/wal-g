@@ -62,7 +62,7 @@ cd ${PGDATA_BETA}
   echo "archive_timeout = 600"
 } >> postgresql.conf
 touch ${PGDATA_BETA}/standby.signal
-cat > postgresql.conf << EOF
+cat >> postgresql.conf << EOF
 primary_conninfo = 'host=127.0.0.1 port=${ALPHA_PORT} user=repl password=password'
 restore_command = 'cp ${PGDATA_BETA}/archive/%f %p'
 promote_trigger_file = '/tmp/postgresql.trigger.${BETA_PORT}'

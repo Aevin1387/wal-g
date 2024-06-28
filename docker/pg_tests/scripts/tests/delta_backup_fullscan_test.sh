@@ -28,6 +28,7 @@ pg_dumpall -f /tmp/dump1
 pgbench -c 2 -T 100000000 -S &
 sleep 1
 wal-g --config=${TMP_CONFIG} backup-push ${PGDATA}
+/usr/lib/postgresql/15/bin/pg_ctl -D ${PGDATA} -w stop
 /tmp/scripts/drop_pg.sh
 
 wal-g --config=${TMP_CONFIG} backup-fetch ${PGDATA} LATEST
