@@ -1,4 +1,4 @@
-"WALE_S3_PREFIX": "s3://nonexistentbucket",
+"WALE_S3_PREFIX": "s3://transferbackupbucket/failover",
 "WALG_DELTA_MAX_STEPS": "6",
 "WALG_LOG_LEVEL": "DEVEL",
 "WALG_PGP_KEY_PATH": "/tmp/PGP_KEY",
