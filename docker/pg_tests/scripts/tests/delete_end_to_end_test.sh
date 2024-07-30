@@ -50,7 +50,7 @@ FIRST=`wal-g --config=${TMP_CONFIG} backup-list | head -n 2 | tail -n 1 | cut -f
 
 for i in ${FIRST} LATEST
 do
-/tmp/scripts/drop_pg.sh
+    /tmp/scripts/drop_pg.sh
     wal-g --config=${TMP_CONFIG} backup-fetch ${PGDATA} ${i}
     echo "restore_command = 'echo \"WAL file restoration: %f, %p\"&& /usr/bin/wal-g --config=${TMP_CONFIG} wal-fetch \"%f\" \"%p\"'" >> ${PGDATA}/postgresql.conf
     touch "${PGDATA}"/recovery.signal

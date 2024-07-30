@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e -x
 CONFIG_FILE="/tmp/configs/config_test_config.json"
-rm -f /tmp/storage
+rm -rf /tmp/storage
 mkdir /tmp/storage
 
 COMMON_CONFIG="/tmp/configs/common_config.json"
